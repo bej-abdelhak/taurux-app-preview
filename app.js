@@ -8,7 +8,8 @@ const SCREENS = {
   login:       { fn: scrLogin,       title: 'تسجيل الدخول|Login',           nav: false, group: 'flow', cap: 'الدخول (OTP + بصمة)' },
   home:        { fn: scrHome,        title: 'الرئيسية|Home',                nav: true, navTab: 'home',    group: 'main', cap: 'الرئيسية — التصميم الجديد' },
   activity:    { fn: scrActivity,    title: 'نشاطي|Activity',               nav: true, navTab: 'activity',group: 'main', cap: 'نشاطي — زيارات/فواتير/اشتراكات' },
-  store:       { fn: scrStore,       title: 'المتجر|Store',                 nav: true, navTab: 'store',   group: 'main', cap: 'المتجر — الباقات' },
+  store:       { fn: scrStore,       title: 'المتجر|Store',                 nav: true, navTab: 'store',   group: 'main', cap: 'المتجر — باقات / تدريب شخصي / منتجات' },
+  schedule:    { fn: scrSchedule,    title: 'الحصص|Classes',                nav: false, group: 'main', cap: 'الحصص — الجدول الأسبوعي', badge: 'جديد' },
   profile:     { fn: scrProfile,     title: 'حسابي|Profile',                nav: true, navTab: 'profile', group: 'main', cap: 'حسابي' },
   rewards:     { fn: scrRewards,     title: 'النقاط والمكافآت|Rewards',     nav: false, group: 'engage', cap: 'النقاط والمكافآت', badge: 'جديد' },
   achievements:{ fn: scrAchievements,title: 'الإنجازات والسلسلة|Achievements',nav: false, group: 'engage', cap: 'الإنجازات + سلسلة الحضور', badge: 'جديد' },
@@ -142,7 +143,7 @@ function buildIndex() {
   paintIcons(root);
 }
 function groupIcon(k) {
-  const m = { onboarding:'sparkles', login:'lock', rewards:'sparkles', achievements:'flame',
+  const m = { schedule:'calendar', onboarding:'sparkles', login:'lock', rewards:'sparkles', achievements:'flame',
     challenges:'trophy', referral:'gift', progress:'trendingUp', workout:'dumbbell', aiCoach:'sparkles',
     classDetail:'calendar', trainer:'medal', checkout:'card', manageSub:'settings', wallet:'wallet',
     notifications:'bell' };

@@ -34,6 +34,52 @@ const DATA = {
     { name: { ar: 'سبينينج', en: 'Spinning' }, time: '6:00 ص', trainer: { ar: 'كابتن سعد', en: 'Coach Saad' }, spots: 6, cap: 18, color: '#06B6D4', day: { ar: 'غداً', en: 'Tomorrow' } },
   ],
 
+  // Weekly class schedule (الحصص)
+  scheduleDays: [
+    { dayAr: 'السبت', dayEn: 'Sat', date: '21', monthAr: 'يونيو', monthEn: 'Jun', items: [
+      { time: '6:00', apAr: 'ص', apEn: 'AM', dur: 60, catAr: 'سبينينج', catEn: 'Spinning', nameAr: 'سبينينج الصباح', nameEn: 'Morning Spin', trAr: 'كابتن سعد', trEn: 'Coach Saad', emoji: '🚴', spots: 6, cap: 18, color: '#06B6D4' },
+      { time: '6:00', apAr: 'م', apEn: 'PM', dur: 60, catAr: 'كروس فت', catEn: 'CrossFit', nameAr: 'كروس فت', nameEn: 'CrossFit', trAr: 'كابتن خالد', trEn: 'Coach Khalid', emoji: '🔥', spots: 4, cap: 16, color: '#F97316' },
+      { time: '7:30', apAr: 'م', apEn: 'PM', dur: 45, catAr: 'يوغا', catEn: 'Yoga', nameAr: 'يوغا مسائية', nameEn: 'Evening Yoga', trAr: 'كابتن نورة', trEn: 'Coach Noura', emoji: '🧘‍♀️', spots: 9, cap: 20, color: '#8B5CF6' },
+      { time: '9:00', apAr: 'م', apEn: 'PM', dur: 60, catAr: 'ملاكمة', catEn: 'Boxing', nameAr: 'ملاكمة', nameEn: 'Boxing', trAr: 'كابتن خالد', trEn: 'Coach Khalid', emoji: '🥊', spots: 0, cap: 12, color: '#EF4444' },
+    ]},
+    { dayAr: 'الأحد', dayEn: 'Sun', date: '22', monthAr: 'يونيو', monthEn: 'Jun', items: [
+      { time: '7:00', apAr: 'ص', apEn: 'AM', dur: 45, catAr: 'هيت', catEn: 'HIIT', nameAr: 'حرق دهون HIIT', nameEn: 'Fat-burn HIIT', trAr: 'كابتن ريم', trEn: 'Coach Reem', emoji: '⚡', spots: 8, cap: 16, color: '#22C55E' },
+      { time: '6:00', apAr: 'م', apEn: 'PM', dur: 60, catAr: 'أثقال', catEn: 'Strength', nameAr: 'رفع أثقال', nameEn: 'Strength', trAr: 'كابتن سعد', trEn: 'Coach Saad', emoji: '🏋️', spots: 3, cap: 12, color: '#D4AF37' },
+      { time: '8:00', apAr: 'م', apEn: 'PM', dur: 50, catAr: 'زومبا', catEn: 'Zumba', nameAr: 'زومبا', nameEn: 'Zumba', trAr: 'كابتن نورة', trEn: 'Coach Noura', emoji: '💃', spots: 12, cap: 25, color: '#EC4899' },
+    ]},
+    { dayAr: 'الإثنين', dayEn: 'Mon', date: '23', monthAr: 'يونيو', monthEn: 'Jun', items: [
+      { time: '6:30', apAr: 'ص', apEn: 'AM', dur: 60, catAr: 'كروس فت', catEn: 'CrossFit', nameAr: 'كروس فت الفجر', nameEn: 'Dawn CrossFit', trAr: 'كابتن خالد', trEn: 'Coach Khalid', emoji: '🔥', spots: 5, cap: 16, color: '#F97316' },
+      { time: '7:00', apAr: 'م', apEn: 'PM', dur: 45, catAr: 'يوغا', catEn: 'Yoga', nameAr: 'يوغا', nameEn: 'Yoga', trAr: 'كابتن نورة', trEn: 'Coach Noura', emoji: '🧘‍♀️', spots: 14, cap: 20, color: '#8B5CF6' },
+    ]},
+    { dayAr: 'الثلاثاء', dayEn: 'Tue', date: '24', monthAr: 'يونيو', monthEn: 'Jun', items: [
+      { time: '6:00', apAr: 'م', apEn: 'PM', dur: 60, catAr: 'سبينينج', catEn: 'Spinning', nameAr: 'سبينينج', nameEn: 'Spinning', trAr: 'كابتن سعد', trEn: 'Coach Saad', emoji: '🚴', spots: 7, cap: 18, color: '#06B6D4' },
+      { time: '9:00', apAr: 'م', apEn: 'PM', dur: 60, catAr: 'ملاكمة', catEn: 'Boxing', nameAr: 'ملاكمة', nameEn: 'Boxing', trAr: 'كابتن خالد', trEn: 'Coach Khalid', emoji: '🥊', spots: 6, cap: 12, color: '#EF4444' },
+    ]},
+    { dayAr: 'الأربعاء', dayEn: 'Wed', date: '25', monthAr: 'يونيو', monthEn: 'Jun', items: [
+      { time: '7:00', apAr: 'ص', apEn: 'AM', dur: 45, catAr: 'هيت', catEn: 'HIIT', nameAr: 'حرق دهون', nameEn: 'HIIT', trAr: 'كابتن ريم', trEn: 'Coach Reem', emoji: '⚡', spots: 10, cap: 16, color: '#22C55E' },
+      { time: '6:00', apAr: 'م', apEn: 'PM', dur: 60, catAr: 'كروس فت', catEn: 'CrossFit', nameAr: 'كروس فت', nameEn: 'CrossFit', trAr: 'كابتن خالد', trEn: 'Coach Khalid', emoji: '🔥', spots: 2, cap: 16, color: '#F97316' },
+    ]},
+  ],
+
+  // Personal training packages (تدريب شخصي)
+  ptPackages: [
+    { sessions: 4, price: 600, old: 720, per: 150, popular: false, ar: 'باقة البداية', en: 'Starter' },
+    { sessions: 8, price: 1100, old: 1440, per: 138, popular: true, ar: 'باقة النخبة', en: 'Elite' },
+    { sessions: 12, price: 1500, old: 2160, per: 125, popular: false, ar: 'باقة الاحتراف', en: 'Pro' },
+  ],
+
+  // Store products (منتجات)
+  products: [
+    { emoji: '🥛', nameAr: 'بروتين واي 2كجم', nameEn: 'Whey Protein 2kg', catAr: 'مكملات', catEn: 'Supplements', price: 220, color: '#3B82F6' },
+    { emoji: '💊', nameAr: 'كرياتين 300غ', nameEn: 'Creatine 300g', catAr: 'مكملات', catEn: 'Supplements', price: 90, color: '#8B5CF6' },
+    { emoji: '⚡', nameAr: 'مشروب طاقة', nameEn: 'Energy Drink', catAr: 'مشروبات', catEn: 'Drinks', price: 15, color: '#F97316' },
+    { emoji: '🥤', nameAr: 'شيكر تاوروكس', nameEn: 'Taurux Shaker', catAr: 'إكسسوارات', catEn: 'Gear', price: 45, color: '#06B6D4' },
+    { emoji: '👕', nameAr: 'تيشيرت تمرين', nameEn: 'Training Tee', catAr: 'ملابس', catEn: 'Apparel', price: 120, color: '#22C55E' },
+    { emoji: '🧤', nameAr: 'قفازات رفع', nameEn: 'Lifting Gloves', catAr: 'إكسسوارات', catEn: 'Gear', price: 75, color: '#EF4444' },
+    { emoji: '🎽', nameAr: 'حزام رفع أثقال', nameEn: 'Lifting Belt', catAr: 'إكسسوارات', catEn: 'Gear', price: 160, color: '#D4AF37' },
+    { emoji: '💧', nameAr: 'أحماض BCAA', nameEn: 'BCAA Aminos', catAr: 'مكملات', catEn: 'Supplements', price: 130, color: '#EC4899' },
+  ],
+
   trainers: [
     { name: { ar: 'كابتن سعد', en: 'Coach Saad' }, spec: { ar: 'لياقة وتضخيم', en: 'Strength' }, rating: 4.9, emoji: '💪' },
     { name: { ar: 'كابتن نورة', en: 'Coach Noura' }, spec: { ar: 'يوغا ومرونة', en: 'Yoga' }, rating: 5.0, emoji: '🧘‍♀️' },

@@ -115,7 +115,7 @@ function scrHome() {
     ${secHead(L('وصول سريع','Quick actions'))}
     <div class="qa-grid">
       ${qa('scan', L('دخول','Check-in'), 'wallet')}
-      ${qa('calendar', L('الحصص','Classes'), 'store', 2)}
+      ${qa('calendar', L('الحصص','Classes'), 'schedule')}
       ${qa('snowflake', L('تجميد','Freeze'), 'manageSub')}
       ${qa('dumbbell', L('تماريني','Workout'), 'workout')}
       ${qa('trendingUp', L('تقدمي','Progress'), 'progress')}
@@ -168,7 +168,7 @@ function scrHome() {
     </div>
 
     <!-- today classes -->
-    ${secHead(L('حصص اليوم','Today\'s classes'), L('الجدول','Schedule'), "go('store',2)")}
+    ${secHead(L('حصص اليوم','Today\'s classes'), L('الجدول','Schedule'), "go('schedule')")}
     <div class="chip-row" style="gap:12px">
       ${DATA.classes.slice(0,3).map(c=>classCard(c)).join('')}
     </div>
@@ -305,41 +305,147 @@ function actSubs() {
     </div>`;
 }
 
-/* ============================================================ STORE */
+/* ============================================================ STORE (tabs: Plans / PT / Products) */
+let storeTab = 0;
 function scrStore() {
   return `
   ${topbar(L('المتجر','Store'), 'home')}
   <div class="px mt8">
     <div class="tabs">
-      <div class="tab on">${L('الباقات','Plans')}</div>
-      <div class="tab" onclick="toast(L('التدريب الشخصي','Personal Training'))">${L('تدريب شخصي','PT')}</div>
-      <div class="tab" onclick="toast(L('المنتجات','Products'))">${L('منتجات','Shop')}</div>
+      <div class="tab ${storeTab===0?'on':''}" onclick="storeTab=0;render()">${L('الباقات','Plans')}</div>
+      <div class="tab ${storeTab===1?'on':''}" onclick="storeTab=1;render()">${L('تدريب شخصي','PT')}</div>
+      <div class="tab ${storeTab===2?'on':''}" onclick="storeTab=2;render()">${L('منتجات','Shop')}</div>
     </div>
+    <div class="mt8">${storeTab===0?storePlans():storeTab===1?storePT():storeProducts()}</div>
+  </div>`;
+}
 
-    <!-- ── EXCLUSIVE OFFERS ── -->
-    <div class="sec-head" style="margin:22px 0 12px">
+function storePlans() {
+  return `
+    <div class="sec-head" style="margin:18px 0 12px">
       <div class="sec-title">🔥 ${L('عروض حصرية','Exclusive offers')}</div>
       <div class="sec-link" onclick="toast(L('كل العروض','All offers'))">${L('تنتهي قريباً','Ending soon')} ${svg('chevronLeft',14)}</div>
     </div>
-    <div class="offer-row reveal">
-      ${DATA.offers.map(o=>offerCard(o)).join('')}
-    </div>
-
-    <!-- promo code -->
+    <div class="offer-row reveal">${DATA.offers.map(o=>offerCard(o)).join('')}</div>
     <div class="promo-field mt16">
       <div class="soft-ico">${svg('gift',16)}</div>
       <input placeholder="${L('عندك كود خصم؟','Got a promo code?')}" />
       <button class="btn btn-gold btn-sm" onclick="toast(L('جارٍ التحقق من الكود...','Checking code...'))">${L('تطبيق','Apply')}</button>
     </div>
-
-    <!-- ── PLANS ── -->
     <div class="sec-head" style="margin:26px 0 12px"><div class="sec-title">${L('اختر باقتك','Choose your plan')}</div>
     <div class="sec-link" onclick="toast(L('مقارنة الباقات','Compare plans'))">${L('قارن','Compare')}</div></div>
     <div class="chip-row">${['الكل|All','شهور|Months','سنوي|Annual','أيام|Days'].map((x,i)=>{const[a,e]=x.split('|');return `<div class="chip ${i===0?'on gold':''}">${L(a,e)}</div>`}).join('')}</div>
-    <div class="mt16" style="display:flex;flex-direction:column;gap:14px">
-      ${DATA.packages.map(p=>pkgCard(p)).join('')}
+    <div class="mt16" style="display:flex;flex-direction:column;gap:14px">${DATA.packages.map(p=>pkgCard(p)).join('')}</div>
+    <div class="muted" style="text-align:center;font-size:11px;margin-top:16px">${svg('shield',12)} ${L('جميع الأسعار شاملة ضريبة القيمة المضافة 15%','All prices include 15% VAT')}</div>`;
+}
+
+function storePT() {
+  return `
+    <div class="hero mt16" style="text-align:center;padding:22px">
+      <div style="font-size:34px">🏋️</div>
+      <div style="font-weight:900;font-size:18px;margin-top:6px">${L('درّب مع نخبة المدربين','Train with elite coaches')}</div>
+      <div class="dim" style="font-size:12.5px;margin-top:5px">${L('برنامج مخصّص لهدفك مع متابعة أسبوعية','A plan built for your goal + weekly follow-up')}</div>
     </div>
-    <div class="muted" style="text-align:center;font-size:11px;margin-top:16px">${svg('shield',12)} ${L('جميع الأسعار شاملة ضريبة القيمة المضافة 15%','All prices include 15% VAT')}</div>
+    ${secHead(L('اختر مدرّبك','Pick your coach'))}
+    <div class="reel-row" style="gap:11px">
+      ${DATA.trainers.map(t=>`
+        <div class="pt-trainer" onclick="go('trainer')">
+          <div class="av">${t.emoji}</div>
+          <div class="nm">${L(t.name.ar,t.name.en)}</div>
+          <div class="sp">${L(t.spec.ar,t.spec.en)}</div>
+          <div class="rt"><span class="pill gold" style="font-size:10px;padding:3px 8px">${svg('star',11)} ${t.rating}</span></div>
+        </div>`).join('')}
+    </div>
+    ${secHead(L('باقات التدريب','PT packages'))}
+    <div style="display:flex;flex-direction:column;gap:12px">${DATA.ptPackages.map(p=>ptCard(p)).join('')}</div>
+    <div class="muted" style="text-align:center;font-size:11px;margin-top:16px">${svg('shield',12)} ${L('الجلسات صالحة 3 أشهر · شاملة الضريبة','Sessions valid 3 months · incl. VAT')}</div>`;
+}
+function ptCard(p) {
+  const save = p.old - p.price;
+  return `
+  <div class="pt-pkg ${p.popular?'feat':''}" onclick="go('checkout')">
+    ${p.popular?`<div class="between" style="margin-bottom:12px"><span class="pill gold">${svg('crown',13)} ${L('الأكثر طلباً','Most popular')}</span><span class="pill green">${svg('zap',12)} ${L('وفّر','Save')} ${save}</span></div>`:''}
+    <div class="row gap14">
+      <div class="pt-sessions"><div class="n">${p.sessions}</div><div class="l">${L('حصص','SESSIONS')}</div></div>
+      <div style="flex:1">
+        <div style="font-weight:800;font-size:16px">${L(p.ar,p.en)}</div>
+        <div class="muted" style="font-size:11.5px;margin-top:2px">≈ ${p.per} ${L('ر.س/حصة','SAR/session')}</div>
+      </div>
+      <div style="text-align:end">
+        <div class="muted num" style="font-size:12px;text-decoration:line-through">${p.old}</div>
+        <div class="num" style="font-weight:900;font-size:21px">${p.price} <span class="gold" style="font-size:11px">${L('ر.س','SAR')}</span></div>
+      </div>
+    </div>
+    <button class="btn ${p.popular?'btn-gold':'btn-ghost'} mt16">${L('احجز الآن','Book now')} ${svg('chevronLeft',16)}</button>
+  </div>`;
+}
+
+function storeProducts() {
+  return `
+    <div class="chip-row mt16">${['الكل|All','مكملات|Supplements','مشروبات|Drinks','ملابس|Apparel','إكسسوارات|Gear'].map((x,i)=>{const[a,e]=x.split('|');return `<div class="chip ${i===0?'on gold':''}">${L(a,e)}</div>`}).join('')}</div>
+    <div class="prod-grid mt16">
+      ${DATA.products.map(p=>`
+        <div class="prod-card" onclick="go('checkout')">
+          <div class="prod-emoji" style="background:${p.color}1f">${p.emoji}</div>
+          <div class="prod-cat">${L(p.catAr,p.catEn)}</div>
+          <div class="prod-name">${L(p.nameAr,p.nameEn)}</div>
+          <div class="prod-foot">
+            <div class="prod-price">${p.price} <span class="gold">${L('ر.س','SAR')}</span></div>
+            <button class="prod-add" onclick="event.stopPropagation();toast(L('أُضيف للسلة 🛒','Added to cart 🛒'))">${svg('plus',17)}</button>
+          </div>
+        </div>`).join('')}
+    </div>
+    <div style="height:10px"></div>`;
+}
+
+/* ============================================================ SCHEDULE (الحصص) */
+let scheduleDay = 0;
+function scrSchedule() {
+  const days = DATA.scheduleDays;
+  const day = days[scheduleDay] || days[0];
+  return `
+  ${topbar(L('الحصص','Classes'), 'home')}
+  <div class="px mt8">
+    <div class="dim" style="font-size:13px">${L('اختر اليوم واحجز مكانك في الحصة','Pick a day and book your spot')}</div>
+    <div class="day-row mt16">
+      ${days.map((d,i)=>`
+        <div class="day-pill ${i===scheduleDay?'on':''}" onclick="scheduleDay=${i};render()">
+          <div class="day-wk">${L(d.dayAr,d.dayEn)}</div>
+          <div class="day-dt">${d.date}</div>
+        </div>`).join('')}
+    </div>
+    <div class="chip-row mt16">${['الكل|All','كروس فت|CrossFit','يوغا|Yoga','أثقال|Strength','ملاكمة|Boxing'].map((x,i)=>{const[a,e]=x.split('|');return `<div class="chip ${i===0?'on gold':''}">${L(a,e)}</div>`}).join('')}</div>
+    <div class="between mt20">
+      <div class="sec-title">${L(day.dayAr,day.dayEn)} · ${day.date} ${L(day.monthAr,day.monthEn)}</div>
+      <span class="num muted" style="font-size:12px">${day.items.length} ${L('حصص','classes')}</span>
+    </div>
+    <div class="mt12">${day.items.map(c=>schedCard(c)).join('')}</div>
+  </div>`;
+}
+function schedCard(c) {
+  const full = c.spots === 0;
+  const low = c.spots > 0 && c.spots <= 3;
+  return `
+  <div class="sched-card ${full?'full':''}" onclick="${full?"toast(L('انضممت لقائمة الانتظار','Added to waitlist'))":"go('classDetail')"}">
+    <div class="sched-time">
+      <div class="sched-h">${c.time}</div>
+      <div class="sched-ap">${L(c.apAr,c.apEn)}</div>
+      <div class="sched-dur">${c.dur} ${L('د','min')}</div>
+    </div>
+    <div class="sched-rail" style="background:${c.color}"></div>
+    <div class="sched-body">
+      <span class="sched-cat" style="color:${c.color};background:${c.color}1f">${c.emoji} ${L(c.catAr,c.catEn)}</span>
+      <div class="sched-name">${L(c.nameAr,c.nameEn)}</div>
+      <div class="sched-tr"><div class="sched-av">🧑‍🏫</div><span>${L(c.trAr,c.trEn)}</span></div>
+      <div class="sched-foot">
+        ${full
+          ? `<span class="pill red" style="font-size:10.5px;padding:3px 9px">${L('مكتمل','Full')}</span>`
+          : `<span class="sched-spots"><span class="sdot" style="background:${low?'#F97316':'#22C55E'}"></span>${c.spots} ${L('مقاعد متبقية','spots left')}</span>`}
+        ${full
+          ? `<span class="sched-wait">${L('قائمة الانتظار','Waitlist')} ${svg('chevronLeft',12)}</span>`
+          : `<span class="sched-book">${L('احجز','Book')} ${svg('chevronLeft',13)}</span>`}
+      </div>
+    </div>
   </div>`;
 }
 
@@ -601,7 +707,7 @@ function scrClassDetail() {
   const c = DATA.classes[0];
   return `
   <div class="screen-hero" style="position:relative;height:230px;background:linear-gradient(160deg,#F97316,#9a3412);overflow:hidden">
-    <div class="topbar" style="position:relative;z-index:3;padding-top:60px"><div class="topbar-btn" style="background:rgba(0,0,0,.3);border:none;color:#fff" onclick="go('store',2)">${svg('chevronRight',19)}</div>
+    <div class="topbar" style="position:relative;z-index:3;padding-top:60px"><div class="topbar-btn" style="background:rgba(0,0,0,.3);border:none;color:#fff" onclick="go('schedule')">${svg('chevronRight',19)}</div>
     <div class="topbar-btn" onclick="toast(L('أضيف للمفضلة','Favorited'))" style="margin-inline-start:auto;background:rgba(0,0,0,.3);border:none;color:#fff">${svg('heart',18)}</div></div>
     <div style="position:absolute;bottom:22px;inset-inline-start:20px;color:#fff;z-index:3">
       <div style="font-size:44px">🔥</div>
