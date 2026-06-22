@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Taurux App · معاينة التصميم الجديد</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="theme-dark" dir="rtl">
+
+  <!-- ===== Studio backdrop ===== -->
+  <div class="studio">
+
+    <!-- ===== Left review panel ===== -->
+    <aside class="panel" id="panel">
+      <div class="panel-brand">
+        <div class="panel-logo">T</div>
+        <div>
+          <div class="panel-title">Taurux <span>App</span></div>
+          <div class="panel-sub">معاينة التصميم الجديد · v2.0</div>
+        </div>
+      </div>
+
+      <div class="panel-controls">
+        <button class="seg" id="themeToggle" title="الوضع الليلي/النهاري">
+          <span class="seg-ico" data-icon="moon"></span>
+          <span class="seg-lbl" id="themeLbl">ليلي</span>
+        </button>
+        <button class="seg" id="langToggle" title="اللغة">
+          <span class="seg-ico" data-icon="globe"></span>
+          <span class="seg-lbl" id="langLbl">عربي</span>
+        </button>
+      </div>
+
+      <div class="panel-scroll" id="screenIndex"><!-- filled by app.js --></div>
+
+      <div class="panel-foot">
+        <span class="dot-live"></span> نموذج تفاعلي — اضغط أي شاشة للتنقّل
+      </div>
+    </aside>
+
+    <!-- ===== Phone stage ===== -->
+    <main class="stage">
+      <button class="stage-nav prev" id="navPrev" title="السابق"><span data-icon="chevron-right"></span></button>
+
+      <div class="phone" id="phone">
+        <div class="phone-frame">
+          <div class="dynamic-island"></div>
+          <div class="status-bar">
+            <span class="sb-time">9:41</span>
+            <span class="sb-right">
+              <span data-icon="signal"></span>
+              <span data-icon="wifi"></span>
+              <span class="sb-batt"></span>
+            </span>
+          </div>
+          <div class="screen-host" id="screenHost"><!-- screen injected here --></div>
+          <div class="nav-host" id="navHost"><!-- bottom nav injected here --></div>
+        </div>
+      </div>
+
+      <button class="stage-nav next" id="navNext" title="التالي"><span data-icon="chevron-left"></span></button>
+
+      <div class="stage-caption" id="stageCaption"></div>
+    </main>
+  </div>
+
+  <!-- toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="icons.js"></script>
+  <script src="data.js"></script>
+  <script src="screens.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
