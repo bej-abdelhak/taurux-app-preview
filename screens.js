@@ -1639,20 +1639,49 @@ function scrLogin() {
 }
 
 /* ============================================================ ONBOARDING (bonus, no nav) */
+let onbSlide = 0;
+const ONB_SLIDES = [
+  { img:'hero1.jpg',
+    kAr:'مرحباً بك في تاوروكس', kEn:'Welcome to Taurux',
+    tAr:['قوّةٌ','بلا حدود'], tEn:['Strength','without limits'],
+    sAr:'انضم لمجتمع تاوروكس وابدأ رحلتك نحو أقوى نسخة من نفسك.', sEn:'Join the Taurux community and become your strongest self.' },
+  { img:'hero2.jpg',
+    kAr:'درّب · تابع · تطوّر', kEn:'Train · Track · Grow',
+    tAr:['كل تمرينٍ','يُحتسب'], tEn:['Every rep','counts'],
+    sAr:'احجز حصصك، تابع تقدّمك، واكسب نقاطاً مع كل زيارة للنادي.', sEn:'Book classes, track your progress and earn points every visit.' },
+  { img:'hero3.jpg',
+    kAr:'جاهز للانطلاق؟', kEn:'Ready to start?',
+    tAr:['ناديك','في جيبك'], tEn:['Your gym','in your pocket'],
+    sAr:'اشتراك، حصص، تدريب شخصي ومتجر — كل شيء من مكان واحد.', sEn:'Membership, classes, PT and store — all in one place.' },
+];
+function onbGo(n) { onbSlide = n; render(); }
+function onbNext() { if (onbSlide < ONB_SLIDES.length - 1) onbGo(onbSlide + 1); else go('login'); }
 function scrOnboarding() {
+  const i = onbSlide, s = ONB_SLIDES[i], last = i === ONB_SLIDES.length - 1;
   return `
-  <div style="flex:1;position:relative;display:flex;flex-direction:column;margin:-54px -0 0;
-    background:linear-gradient(180deg,#0c0c0c,#000)">
-    <div style="height:64px"></div>
-    <div style="flex:1;display:grid;place-items:center;font-size:120px">🏋️</div>
-    <div class="px" style="padding-bottom:40px;text-align:center;color:#fff">
-      <div class="row gap6 mt8" style="justify-content:center;margin-bottom:24px">
-        <div style="width:24px;height:6px;border-radius:6px;background:var(--gold)"></div>
-        <div style="width:6px;height:6px;border-radius:6px;background:rgba(255,255,255,.25)"></div>
+  <div class="onb">
+    <div class="onb-bg"><img src="assets/onboard/${s.img}" alt="" key="${i}"></div>
+    <div class="onb-shade"></div>
+    <div class="onb-grain"></div>
+
+    <div class="onb-top">
+      <div class="onb-logo"><span class="mark">T</span> TAURUX</div>
+      <div class="onb-skip" onclick="go('login')">${L('تخطّي','Skip')}</div>
+    </div>
+
+    <div class="onb-body">
+      <div class="onb-anim d1"><span class="onb-kicker">${svg('flame',13)} ${L(s.kAr,s.kEn)}</span></div>
+      <div class="onb-title onb-anim d2">${L(s.tAr[0],s.tEn[0])} <span class="gold">${L(s.tAr[1],s.tEn[1])}</span></div>
+      <div class="onb-sub onb-anim d3">${L(s.sAr,s.sEn)}</div>
+
+      <div class="onb-anim d4">
+        <div class="onb-dots">${ONB_SLIDES.map((_,n)=>`<div class="onb-dot ${n===i?'on':''}" onclick="onbGo(${n})"></div>`).join('')}</div>
+        <div class="onb-cta-row">
+          <button class="btn btn-gold" style="flex:1" onclick="${last?"go('login')":'onbNext()'}">${last?L('أنشئ حسابك','Create account'):L('التالي','Next')} ${svg('chevronLeft',17)}</button>
+          <div class="onb-next" onclick="onbNext()">${svg(last?'check':'chevronLeft',24)}</div>
+        </div>
+        <div class="onb-login" onclick="go('login')">${L('لديك حساب؟','Already a member?')} <b>${L('سجّل دخولك','Sign in')}</b></div>
       </div>
-      <div style="font-weight:900;font-size:28px">${L('ناديك، بقوانينك','Your gym, your rules')}</div>
-      <div style="opacity:.7;font-size:14px;margin-top:12px;line-height:1.8">${L('اشترك، احجز حصصك، تابع تقدّمك، واكسب نقاط — كله من مكان واحد.','Subscribe, book classes, track progress and earn points — all in one place.')}</div>
-      <button class="btn btn-gold mt24" onclick="go('login')">${L('ابدأ الآن','Get started')}</button>
     </div>
   </div>`;
 }

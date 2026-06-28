@@ -796,6 +796,40 @@ body[dir="ltr"] .promo::after { background: linear-gradient(270deg, rgba(0,0,0,.
 .attend-bar .big { font-weight: 900; font-size: 20px; }
 .cc { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; }
 
+/* ============================================================
+   CINEMATIC ONBOARDING / WELCOME
+   ============================================================ */
+.onb { position: absolute; inset: 0; overflow: hidden; background: #000; display: flex; flex-direction: column; }
+.onb-bg { position: absolute; inset: 0; }
+.onb-bg img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; animation: onbFade 1s ease forwards, onbKB 14s ease-in-out infinite alternate; }
+@keyframes onbFade { to { opacity: 1; } }
+@keyframes onbKB { from { transform: scale(1.06) translateY(0); } to { transform: scale(1.2) translateY(-12px); } }
+.onb-shade { position: absolute; inset: 0; background:
+  radial-gradient(120% 80% at 50% 0%, rgba(0,0,0,.55), transparent 45%),
+  linear-gradient(180deg, rgba(0,0,0,.4) 0%, rgba(0,0,0,.05) 32%, rgba(0,0,0,.5) 60%, rgba(8,8,8,.97) 100%); }
+.onb-grain { position: absolute; inset: 0; opacity: .5; mix-blend-mode: overlay;
+  background: radial-gradient(circle at 20% 30%, rgba(212,175,55,.10), transparent 40%); }
+.onb-top { position: relative; z-index: 4; display: flex; justify-content: space-between; align-items: center; padding: 64px 18px 0; }
+.onb-logo { display: flex; align-items: center; gap: 9px; color: #fff; font-weight: 900; font-size: 16px; letter-spacing: .5px; }
+.onb-logo .mark { width: 32px; height: 32px; border-radius: 10px; background: linear-gradient(135deg, var(--gold), #b8932f); color: #0A0A0A; display: grid; place-items: center; font-weight: 900; box-shadow: 0 6px 18px rgba(212,175,55,.4); }
+.onb-skip { color: #fff; opacity: .85; font-size: 13px; font-weight: 600; background: rgba(255,255,255,.13); padding: 8px 15px; border-radius: 999px; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); cursor: pointer; }
+.onb-body { position: relative; z-index: 4; margin-top: auto; padding: 0 24px 30px; color: #fff; }
+.onb-kicker { display: inline-flex; align-items: center; gap: 7px; background: rgba(212,175,55,.16); border: 1px solid rgba(212,175,55,.45); color: var(--gold); font-weight: 700; font-size: 12px; padding: 7px 13px; border-radius: 999px; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.onb-title { font-weight: 900; font-size: 34px; line-height: 1.18; margin-top: 16px; text-shadow: 0 4px 30px rgba(0,0,0,.7); }
+.onb-title .gold { color: var(--gold); }
+.onb-sub { opacity: .82; font-size: 14.5px; line-height: 1.85; margin-top: 13px; max-width: 90%; text-shadow: 0 2px 16px rgba(0,0,0,.8); }
+.onb-anim { opacity: 0; transform: translateY(18px); animation: onbUp .6s cubic-bezier(.2,.7,.3,1) forwards; }
+.onb-anim.d1 { animation-delay: .08s; } .onb-anim.d2 { animation-delay: .18s; } .onb-anim.d3 { animation-delay: .28s; } .onb-anim.d4 { animation-delay: .38s; }
+@keyframes onbUp { to { opacity: 1; transform: translateY(0); } }
+.onb-dots { display: flex; gap: 7px; margin: 22px 0 18px; }
+.onb-dot { height: 6px; width: 6px; border-radius: 6px; background: rgba(255,255,255,.32); transition: .35s cubic-bezier(.2,.7,.3,1); cursor: pointer; }
+.onb-dot.on { width: 28px; background: var(--gold); }
+.onb-cta-row { display: flex; gap: 12px; align-items: center; }
+.onb-next { width: 58px; height: 58px; border-radius: 50%; background: var(--gold); color: #0A0A0A; display: grid; place-items: center; flex-shrink: 0; cursor: pointer; box-shadow: 0 10px 30px rgba(212,175,55,.45); transition: .2s; }
+.onb-next:active { transform: scale(.92); }
+.onb-login { text-align: center; margin-top: 16px; font-size: 13.5px; color: rgba(255,255,255,.75); }
+.onb-login b { color: var(--gold); font-weight: 700; }
+
 /* --- trainers directory --- */
 .tr-card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 15px; cursor: pointer; transition: .2s; }
 .tr-card:active { transform: scale(.985); }
