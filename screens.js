@@ -167,6 +167,19 @@ function scrHome() {
       </div>
     </div>
 
+    <!-- next booked class widget -->
+    ${(() => { const nb = DATA.myBookings.find(b=>b.status==='confirmed'); if(!nb) return ''; return `
+    <div class="secHead"></div>
+    ${secHead(L('حصتك القادمة','Your next class'), L('حجوزاتي','My bookings'), "go('myBookings')")}
+    <div class="card reveal" style="padding:14px;display:flex;gap:13px;align-items:center;cursor:pointer" onclick="go('myBookings')">
+      <div class="mb-em" style="background:${nb.color}1f;color:${nb.color}">${nb.emoji}</div>
+      <div style="flex:1">
+        <div class="between"><div style="font-weight:800;font-size:15px">${L(nb.nameAr,nb.nameEn)}</div><span class="mb-badge bg-confirmed">${L('بعد '+nb.inMins+' د','in '+nb.inMins+'m')}</span></div>
+        <div class="muted" style="font-size:12px;margin-top:3px">${svg('clock',12)} ${nb.time} ${L(nb.ap,nb.apEn)} · ${svg('mapPin',12)} ${L(nb.studioAr,nb.studioEn)} · ${L(nb.trAr,nb.trEn)}</div>
+      </div>
+      <button class="btn btn-gold" style="width:auto;padding:10px 14px" onclick="event.stopPropagation();go('bookSuccess')">${svg('scan',15)}</button>
+    </div>`; })()}
+
     <!-- today classes -->
     ${secHead(L('حصص اليوم','Today\'s classes'), L('الجدول','Schedule'), "go('schedule')")}
     <div class="chip-row" style="gap:12px">
@@ -346,10 +359,10 @@ function storePT() {
       <div style="font-weight:900;font-size:18px;margin-top:6px">${L('درّب مع نخبة المدربين','Train with elite coaches')}</div>
       <div class="dim" style="font-size:12.5px;margin-top:5px">${L('برنامج مخصّص لهدفك مع متابعة أسبوعية','A plan built for your goal + weekly follow-up')}</div>
     </div>
-    ${secHead(L('اختر مدرّبك','Pick your coach'))}
+    ${secHead(L('اختر مدرّبك','Pick your coach'), L('عرض الكل','See all'), "go('trainers')")}
     <div class="reel-row" style="gap:11px">
-      ${DATA.trainers.map(t=>`
-        <div class="pt-trainer" onclick="go('trainer')">
+      ${DATA.trainers.map((t,i)=>`
+        <div class="pt-trainer" onclick="selectTrainer(${i})">
           <div class="av">${t.emoji}</div>
           <div class="nm">${L(t.name.ar,t.name.en)}</div>
           <div class="sp">${L(t.spec.ar,t.spec.en)}</div>
@@ -363,7 +376,7 @@ function storePT() {
 function ptCard(p) {
   const save = p.old - p.price;
   return `
-  <div class="pt-pkg ${p.popular?'feat':''}" onclick="go('checkout')">
+  <div class="pt-pkg ${p.popular?'feat':''}" onclick="go('ptBooking')">
     ${p.popular?`<div class="between" style="margin-bottom:12px"><span class="pill gold">${svg('crown',13)} ${L('الأكثر طلباً','Most popular')}</span><span class="pill green">${svg('zap',12)} ${L('وفّر','Save')} ${save}</span></div>`:''}
     <div class="row gap14">
       <div class="pt-sessions"><div class="n">${p.sessions}</div><div class="l">${L('حصص','SESSIONS')}</div></div>
@@ -381,20 +394,28 @@ function ptCard(p) {
 }
 
 function storeProducts() {
+  const count = cartCount();
   return `
-    <div class="chip-row mt16">${['الكل|All','مكملات|Supplements','مشروبات|Drinks','ملابس|Apparel','إكسسوارات|Gear'].map((x,i)=>{const[a,e]=x.split('|');return `<div class="chip ${i===0?'on gold':''}">${L(a,e)}</div>`}).join('')}</div>
+    <div class="between mt16">
+      <span class="muted" style="font-size:12px">${DATA.products.length} ${L('منتج','products')}</span>
+      <div class="row gap8" style="align-items:center;cursor:pointer" onclick="go('cart')">
+        <span class="pill ${count?'gold':''}">${svg('bag',13)} ${L('السلة','Cart')}${count?` · ${count}`:''}</span>
+      </div>
+    </div>
+    <div class="chip-row mt12">${['الكل|All','مكملات|Supplements','مشروبات|Drinks','ملابس|Apparel','إكسسوارات|Gear'].map((x,i)=>{const[a,e]=x.split('|');return `<div class="chip ${i===0?'on gold':''}">${L(a,e)}</div>`}).join('')}</div>
     <div class="prod-grid mt16">
-      ${DATA.products.map(p=>`
-        <div class="prod-card" onclick="go('checkout')">
+      ${DATA.products.map((p,i)=>`
+        <div class="prod-card" onclick="addToCart(${i})">
           <div class="prod-emoji" style="background:${p.color}1f">${p.emoji}</div>
           <div class="prod-cat">${L(p.catAr,p.catEn)}</div>
           <div class="prod-name">${L(p.nameAr,p.nameEn)}</div>
           <div class="prod-foot">
             <div class="prod-price">${p.price} <span class="gold">${L('ر.س','SAR')}</span></div>
-            <button class="prod-add" onclick="event.stopPropagation();toast(L('أُضيف للسلة 🛒','Added to cart 🛒'))">${svg('plus',17)}</button>
+            <button class="prod-add" onclick="event.stopPropagation();addToCart(${i})">${svg('plus',17)}</button>
           </div>
         </div>`).join('')}
     </div>
+    ${count?`<button class="btn btn-gold mt16" onclick="go('cart')">${svg('bag',16)} ${L('عرض السلة','View cart')} (${count})</button>`:''}
     <div style="height:10px"></div>`;
 }
 
@@ -909,6 +930,185 @@ function qrSvg(color) {
 }
 
 /* ============================================================
+   TRAINERS DIRECTORY  +  PT SESSION BOOKING  +  CHAT  +  CART
+   ============================================================ */
+let ptCoach = 0, ptDay = 0, ptSlot = null, trDirFilter = 0;
+function selectTrainer(i) { ptCoach = i; go('trainer'); }
+
+function scrTrainers() {
+  const cats = ['الكل|All','تضخيم|Strength','يوغا|Yoga','ملاكمة|Boxing','تنحيف|Fat loss'];
+  const list = DATA.trainers;
+  return `
+  ${topbar(L('المدربون','Our Coaches'), 'store')}
+  <div class="px mt8">
+    <div class="dim" style="font-size:13px">${L('اختر مدربك الشخصي واحجز حصتك','Pick your personal coach and book')}</div>
+    <div class="chip-row mt14">${cats.map((x,i)=>{const[a,e]=x.split('|');return `<div class="chip ${i===trDirFilter?'on gold':''}" onclick="trDirFilter=${i};render()">${L(a,e)}</div>`}).join('')}</div>
+    <div class="mt16" style="display:flex;flex-direction:column;gap:12px">
+      ${list.map((t,i)=>`
+        <div class="tr-card" onclick="selectTrainer(${i})">
+          <div class="row gap13">
+            <div class="tr-av" style="background:${t.color}1f;color:${t.color}">${t.emoji}</div>
+            <div style="flex:1">
+              <div class="between"><div style="font-weight:800;font-size:15.5px">${L(t.name.ar,t.name.en)}</div>
+              ${t.avail?`<span class="mb-badge bg-confirmed">${L('متاح','Available')}</span>`:`<span class="mb-badge bg-missed">${L('مشغول','Busy')}</span>`}</div>
+              <div class="muted" style="font-size:12px;margin-top:2px">${L(t.spec.ar,t.spec.en)}</div>
+              <div class="row gap8 mt8">
+                <span class="pill gold" style="font-size:10.5px;padding:3px 8px">${svg('star',11)} ${t.rating}</span>
+                <span class="pill" style="font-size:10.5px;padding:3px 8px">${svg('users',11)} ${t.clients}</span>
+                <span class="pill" style="font-size:10.5px;padding:3px 8px">${svg('award',11)} ${t.yrs} ${L('س','y')}</span>
+              </div>
+            </div>
+          </div>
+          <div class="tr-tags">${t.tags.map(x=>{const[a,e]=x.split('|');return `<span class="tr-tag">${L(a,e)}</span>`}).join('')}</div>
+          <div class="tr-foot">
+            <div><span class="muted" style="font-size:11px">${L('يبدأ من','From')}</span> <b class="num">${t.price}</b> <span class="gold" style="font-size:11px">${L('ر.س/حصة','SAR')}</span></div>
+            <span class="sched-book">${L('احجز','Book')} ${svg('chevronLeft',13)}</span>
+          </div>
+        </div>`).join('')}
+    </div>
+    <div style="height:20px"></div>
+  </div>`;
+}
+
+function scrPtBooking() {
+  const t = DATA.trainers[ptCoach] || DATA.trainers[0];
+  const day = DATA.ptSlots[ptDay] || DATA.ptSlots[0];
+  return `
+  ${topbar(L('حجز تدريب شخصي','Book PT Session'), 'trainers')}
+  <div class="px mt8">
+    <div class="card pad row gap13" style="align-items:center">
+      <div class="tr-av" style="background:${t.color}1f;color:${t.color};width:50px;height:50px;font-size:24px">${t.emoji}</div>
+      <div style="flex:1"><div style="font-weight:800;font-size:15px">${L(t.name.ar,t.name.en)}</div>
+      <div class="muted" style="font-size:12px">${svg('star',12)} ${t.rating} · ${L(t.spec.ar,t.spec.en)}</div></div>
+      <span class="sec-link" onclick="go('trainers')" style="font-size:12px">${L('تغيير','Change')}</span>
+    </div>
+
+    ${secHead(L('اختر اليوم','Pick a day'))}
+    <div class="day-row">
+      ${DATA.ptSlots.map((d,i)=>`
+        <div class="day-pill ${i===ptDay?'on':''}" onclick="ptDay=${i};ptSlot=null;render()">
+          <div class="day-wk">${L(d.dAr,d.dEn)}</div><div class="day-dt">${d.date}</div>
+        </div>`).join('')}
+    </div>
+
+    ${secHead(L('الأوقات المتاحة','Available times'))}
+    <div class="slot-grid">
+      ${day.slots.map((s,si)=>{const key=ptDay+'-'+si;const on=ptSlot===key;return `
+        <div class="slot ${s.free?(on?'on':''):'off'}" onclick="${s.free?`ptSlot='${key}';render()`:''}">
+          <div class="h">${s.t}</div><div class="a">${L(s.ap,s.apEn)} · 45 ${L('د','min')}</div>
+        </div>`}).join('')}
+    </div>
+
+    <div class="bk-card mt20">
+      <div class="bk-line"><span class="k">${svg('medal',14)} ${L('الحصة','Session')}</span><span class="v">${L('تدريب شخصي 1:1','Personal 1:1')}</span></div>
+      <div class="bk-line"><span class="k">${svg('clock',14)} ${L('الموعد','Time')}</span><span class="v">${ptSlot?`${day.slots[+ptSlot.split('-')[1]].t} ${L(day.dAr,day.dEn)} ${day.date}`:L('— اختر وقتاً','— pick a slot')}</span></div>
+      <div class="bk-line"><span class="k">${svg('wallet',14)} ${L('السعر','Price')}</span><span class="v">${t.price} <span class="gold">${L('ر.س','SAR')}</span></span></div>
+    </div>
+    <div style="height:90px"></div>
+  </div>
+  <div style="position:absolute;left:16px;right:16px;bottom:16px">
+    <button class="btn ${ptSlot?'btn-gold':'btn-ghost'}" onclick="${ptSlot?"go('ptSuccess')":"toast(L('اختر وقتاً أولاً','Pick a time first'))"}">${svg('checkCircle',18)} ${L('تأكيد الحجز','Confirm booking')}</button>
+  </div>`;
+}
+
+function scrPtSuccess() {
+  const t = DATA.trainers[ptCoach] || DATA.trainers[0];
+  const day = DATA.ptSlots[ptDay] || DATA.ptSlots[0];
+  const s = ptSlot ? day.slots[+ptSlot.split('-')[1]] : day.slots[0];
+  return `
+  <div class="px" style="padding-top:30px;text-align:center">
+    <div class="bk-success-ring"><div class="core">${svg('check',40)}</div></div>
+    <div style="font-weight:900;font-size:22px;margin-top:16px">${L('تم حجز حصتك! 🎯','Session booked! 🎯')}</div>
+    <div class="dim" style="font-size:13.5px;margin-top:6px">${L('سيصلك تذكير قبل موعدك','You\'ll get a reminder before')}</div>
+    <div class="card pad mt20" style="text-align:start">
+      <div class="row gap12" style="align-items:center">
+        <div class="tr-av" style="background:${t.color}1f;color:${t.color};width:50px;height:50px;font-size:24px">${t.emoji}</div>
+        <div style="flex:1"><div style="font-weight:800;font-size:15px">${L(t.name.ar,t.name.en)}</div>
+        <div class="muted" style="font-size:12px">${L('تدريب شخصي','Personal training')} · 45 ${L('د','min')}</div></div>
+      </div>
+      <div class="bk-line mt8"><span class="k">${svg('calendar',14)} ${L('الموعد','When')}</span><span class="v">${L(day.dAr,day.dEn)} ${day.date} · ${s.t} ${L(s.ap,s.apEn)}</span></div>
+    </div>
+    <div class="row gap10 mt16">
+      <button class="btn btn-ghost" onclick="go('chat')">${svg('message',16)} ${L('راسل المدرب','Message coach')}</button>
+    </div>
+    <button class="btn btn-gold mt10" onclick="go('store')">${svg('check',17)} ${L('تم','Done')}</button>
+  </div>`;
+}
+
+function scrChat() {
+  const t = DATA.trainers[ptCoach] || DATA.trainers[0];
+  return `
+  <div class="topbar">
+    <div class="topbar-btn" onclick="history.length>1?history.back():go('store')">${svg('chevronRight',19)}</div>
+    <div class="row gap10" style="align-items:center;flex:1">
+      <div class="chat-av" style="width:38px;height:38px;font-size:19px;background:${t.color}1f">${t.emoji}</div>
+      <div><div style="font-weight:800;font-size:15px">${L(t.name.ar,t.name.en)}</div>
+      <div style="font-size:11px;color:#22C55E">● ${L('متصل الآن','Online')}</div></div>
+    </div>
+    <div class="topbar-btn" onclick="toast(L('اتصال','Call'))">${svg('phone',17)}</div>
+  </div>
+  <div class="px mt8" style="flex:1;overflow-y:auto">
+    <div class="chat-wrap">
+      <div class="muted" style="text-align:center;font-size:11px;margin:6px 0">${L('اليوم','Today')}</div>
+      ${DATA.chatThread.map(m=>`
+        <div class="chat-row ${m.who==='me'?'me':''}">
+          ${m.who==='them'?`<div class="chat-av" style="background:${t.color}1f">${t.emoji}</div>`:''}
+          <div>
+            <div class="bubble ${m.who}">${L(m.ar,m.en)}</div>
+            <div class="chat-t" style="text-align:${m.who==='me'?'start':'end'}">${m.t}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+  </div>
+  <div class="px" style="padding-bottom:14px">
+    <div class="chat-input">
+      <input placeholder="${L('اكتب رسالة...','Type a message...')}" onkeydown="if(event.key==='Enter')toast(L('أُرسلت','Sent'))"/>
+      <div class="chat-send" onclick="toast(L('أُرسلت','Sent'))">${svg('send',18)}</div>
+    </div>
+  </div>`;
+}
+
+function scrCart() {
+  const items = cartItems();
+  const sub = items.reduce((s,it)=>s + DATA.products[it.idx].price*it.qty, 0);
+  const vat = Math.round(sub*0.15);
+  if (!items.length) return `
+    ${topbar(L('السلة','Cart'), 'store')}
+    <div class="px mt8" style="text-align:center;padding-top:60px">
+      <div style="font-size:54px">🛒</div>
+      <div style="font-weight:800;font-size:17px;margin-top:12px">${L('سلتك فارغة','Your cart is empty')}</div>
+      <div class="dim" style="font-size:13px;margin-top:6px">${L('أضف منتجات من المتجر','Add products from the shop')}</div>
+      <button class="btn btn-gold mt20" onclick="go('store')">${svg('bag',16)} ${L('تسوّق الآن','Shop now')}</button>
+    </div>`;
+  return `
+  ${topbar(L('السلة','Cart'), 'store')}
+  <div class="px mt8">
+    <div style="display:flex;flex-direction:column;gap:11px">
+      ${items.map(it=>{const p=DATA.products[it.idx];return `
+        <div class="cart-row">
+          <div class="cart-em" style="background:${p.color}1f">${p.emoji}</div>
+          <div style="flex:1"><div style="font-weight:700;font-size:13.5px">${L(p.nameAr,p.nameEn)}</div>
+          <div class="gold num" style="font-weight:800;font-size:14px;margin-top:3px">${p.price*it.qty} <span style="font-size:10px">${L('ر.س','SAR')}</span></div></div>
+          <div class="qty">
+            <button onclick="changeQty(${it.idx},-1)">−</button>
+            <span class="num" style="font-weight:700;min-width:14px;text-align:center">${it.qty}</span>
+            <button onclick="changeQty(${it.idx},1)">+</button>
+          </div>
+        </div>`}).join('')}
+    </div>
+    <div class="bk-card mt16">
+      <div class="summary-line"><span class="muted">${L('المجموع الفرعي','Subtotal')}</span><span class="num">${sub} ${L('ر.س','SAR')}</span></div>
+      <div class="summary-line"><span class="muted">${L('ضريبة القيمة المضافة 15%','VAT 15%')}</span><span class="num">${vat} ${L('ر.س','SAR')}</span></div>
+      <div class="summary-line total"><span>${L('الإجمالي','Total')}</span><span class="num gold">${sub+vat} ${L('ر.س','SAR')}</span></div>
+    </div>
+    <div style="height:90px"></div>
+  </div>
+  <div style="position:absolute;left:16px;right:16px;bottom:16px">
+    <button class="btn btn-gold" onclick="go('checkout')">${svg('card',18)} ${L('إتمام الشراء','Checkout')} · ${sub+vat} ${L('ر.س','SAR')}</button>
+  </div>`;
+}
+
+/* ============================================================
    COACH (الكابتن) ACCOUNT — separate role experience
    ============================================================ */
 let rosterIdx = 0;
@@ -1087,7 +1287,7 @@ function scrCoachClients() {
           <div class="ro-progress"><i style="width:${c.progress}%"></i></div>
           <div class="between muted" style="font-size:11px;margin-top:7px"><span>${c.lastAr}</span><span class="num">${c.total-c.left}/${c.total} ${L('حصة','done')}</span></div>
           <div class="mb-actions">
-            <div class="mb-act" onclick="toast(L('فتح المحادثة','Open chat'))">${svg('message',13)} ${L('مراسلة','Message')}</div>
+            <div class="mb-act" onclick="go('chat')">${svg('message',13)} ${L('مراسلة','Message')}</div>
             <div class="mb-act gold" onclick="toast(L('تسجيل حصة جديدة','Log a session'))">${svg('plus',13)} ${L('تسجيل حصة','Log session')}</div>
           </div>
         </div>`).join('')}
@@ -1134,31 +1334,36 @@ function scrCoachProfile() {
 
 /* ============================================================ TRAINER PROFILE (sub) */
 function scrTrainer() {
+  const t = DATA.trainers[ptCoach] || DATA.trainers[0];
   return `
-  ${topbar(L('ملف المدرب','Coach Profile'), 'classDetail')}
+  ${topbar(L('ملف المدرب','Coach Profile'), 'trainers')}
   <div class="px mt8" style="text-align:center">
-    <div class="avatar-ring" style="width:104px;height:104px;margin:8px auto 0;padding:3px"><div class="avatar" style="width:100%;height:100%;display:grid;place-items:center;font-size:46px;background:var(--surface-2)">💪</div></div>
-    <div style="font-weight:800;font-size:20px;margin-top:12px">${L('كابتن سعد','Coach Saad')}</div>
-    <div class="muted" style="font-size:13px">${L('مدرب لياقة وتضخيم معتمد','Certified Strength Coach')}</div>
+    <div class="avatar-ring" style="width:104px;height:104px;margin:8px auto 0;padding:3px"><div class="avatar" style="width:100%;height:100%;display:grid;place-items:center;font-size:46px;background:${t.color}1f;color:${t.color}">${t.emoji}</div></div>
+    <div style="font-weight:800;font-size:20px;margin-top:12px">${L(t.name.ar,t.name.en)}</div>
+    <div class="muted" style="font-size:13px">${L(t.spec.ar,t.spec.en)}</div>
     <div class="row gap8 mt12" style="justify-content:center">
-      <span class="pill gold">${svg('star',13)} 4.9</span>
-      <span class="pill">${svg('users',13)} 320 ${L('متدرب','clients')}</span>
-      <span class="pill">${svg('award',13)} 8 ${L('سنوات','yrs')}</span>
+      <span class="pill gold">${svg('star',13)} ${t.rating}</span>
+      <span class="pill">${svg('users',13)} ${t.clients} ${L('متدرب','clients')}</span>
+      <span class="pill">${svg('award',13)} ${t.yrs} ${L('سنوات','yrs')}</span>
     </div>
   </div>
   <div class="px mt20">
     ${secHead(L('التخصصات','Specialties'))}
     <div class="row gap8 wrap">
-      ${['تضخيم|Hypertrophy','قوة|Strength','تغذية|Nutrition','فقدان دهون|Fat loss'].map(x=>{const[a,e]=x.split('|');return `<span class="pill">${L(a,e)}</span>`}).join('')}
+      ${t.tags.map(x=>{const[a,e]=x.split('|');return `<span class="pill">${L(a,e)}</span>`}).join('')}
     </div>
-    ${secHead(L('التقييمات','Reviews'), '4.9 ★')}
-    ${[['تركي','Turki','مدرب محترف وملتزم، شفت نتيجة بعد شهر','Pro and committed, saw results in a month',5],['نواف','Nawaf','أفضل كابتن في النادي بدون مبالغة','Best coach hands down',5]].map(([a,e,ra,re,st])=>`
+    ${secHead(L('التقييمات','Reviews'), t.rating+' ★')}
+    ${DATA.coachReviews.map(r=>`
       <div class="card pad mt8">
-        <div class="between"><div class="row gap8"><div class="avatar" style="width:34px;height:34px;display:grid;place-items:center;background:var(--surface-2)">🧑</div><span style="font-weight:700;font-size:13.5px">${L(a,e)}</span></div>
-        <span class="gold" style="font-size:12px">${'★'.repeat(st)}</span></div>
-        <div class="dim" style="font-size:13px;margin-top:8px;line-height:1.6">${L(ra,re)}</div>
+        <div class="between"><div class="row gap8"><div class="ro-av" style="width:34px;height:34px;font-size:17px">${r.emoji}</div><span style="font-weight:700;font-size:13.5px">${L(r.nameAr,r.nameEn)}</span></div>
+        <span class="gold" style="font-size:12px">${'★'.repeat(r.st)}</span></div>
+        <div class="dim" style="font-size:13px;margin-top:8px;line-height:1.6">${L(r.ar,r.en)}</div>
       </div>`).join('')}
-    <button class="btn btn-gold mt16" onclick="go('store',1)">${svg('medal',17)} ${L('احجز تدريب شخصي','Book Personal Training')}</button>
+    <div class="row gap10 mt16">
+      <button class="btn btn-ghost" onclick="go('chat')">${svg('message',16)} ${L('مراسلة','Message')}</button>
+      <button class="btn btn-gold" onclick="go('ptBooking')">${svg('medal',16)} ${L('احجز تدريب','Book PT')}</button>
+    </div>
+    <div style="height:20px"></div>
   </div>`;
 }
 

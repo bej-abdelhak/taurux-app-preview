@@ -81,10 +81,28 @@ const DATA = {
   ],
 
   trainers: [
-    { name: { ar: 'كابتن سعد', en: 'Coach Saad' }, spec: { ar: 'لياقة وتضخيم', en: 'Strength' }, rating: 4.9, emoji: '💪' },
-    { name: { ar: 'كابتن نورة', en: 'Coach Noura' }, spec: { ar: 'يوغا ومرونة', en: 'Yoga' }, rating: 5.0, emoji: '🧘‍♀️' },
-    { name: { ar: 'كابتن خالد', en: 'Coach Khalid' }, spec: { ar: 'ملاكمة', en: 'Boxing' }, rating: 4.8, emoji: '🥊' },
-    { name: { ar: 'كابتن ريم', en: 'Coach Reem' }, spec: { ar: 'تنحيف', en: 'Weight loss' }, rating: 4.9, emoji: '🏃‍♀️' },
+    { name: { ar: 'كابتن سعد', en: 'Coach Saad' }, spec: { ar: 'لياقة وتضخيم', en: 'Strength' }, rating: 4.9, emoji: '💪', clients: 42, classes: 36, price: 150, yrs: 8, color:'#D4AF37', tags:['تضخيم|Hypertrophy','قوة|Strength','تغذية|Nutrition'], avail:true },
+    { name: { ar: 'كابتن نورة', en: 'Coach Noura' }, spec: { ar: 'يوغا ومرونة', en: 'Yoga & Mobility' }, rating: 5.0, emoji: '🧘‍♀️', clients: 51, classes: 40, price: 140, yrs: 6, color:'#8B5CF6', tags:['يوغا|Yoga','مرونة|Mobility','تنفّس|Breathing'], avail:true },
+    { name: { ar: 'كابتن خالد', en: 'Coach Khalid' }, spec: { ar: 'ملاكمة وكروس فت', en: 'Boxing & CrossFit' }, rating: 4.8, emoji: '🥊', clients: 38, classes: 44, price: 160, yrs: 9, color:'#EF4444', tags:['ملاكمة|Boxing','كروس فت|CrossFit','تحمّل|Endurance'], avail:false },
+    { name: { ar: 'كابتن ريم', en: 'Coach Reem' }, spec: { ar: 'تنحيف وكارديو', en: 'Weight loss & Cardio' }, rating: 4.9, emoji: '🏃‍♀️', clients: 47, classes: 33, price: 145, yrs: 5, color:'#22C55E', tags:['تنحيف|Fat loss','هيت|HIIT','تغذية|Nutrition'], avail:true },
+  ],
+
+  // Personal-training booking time slots (per day)
+  ptSlots: [
+    { dAr:'السبت', dEn:'Sat', date:'21', slots:[{t:'7:00',ap:'ص',apEn:'AM',free:true},{t:'10:00',ap:'ص',apEn:'AM',free:false},{t:'5:00',ap:'م',apEn:'PM',free:true},{t:'7:00',ap:'م',apEn:'PM',free:true}] },
+    { dAr:'الأحد', dEn:'Sun', date:'22', slots:[{t:'8:00',ap:'ص',apEn:'AM',free:true},{t:'11:00',ap:'ص',apEn:'AM',free:true},{t:'6:00',ap:'م',apEn:'PM',free:false},{t:'8:00',ap:'م',apEn:'PM',free:true}] },
+    { dAr:'الإثنين', dEn:'Mon', date:'23', slots:[{t:'7:00',ap:'ص',apEn:'AM',free:false},{t:'9:00',ap:'ص',apEn:'AM',free:true},{t:'5:00',ap:'م',apEn:'PM',free:true},{t:'9:00',ap:'م',apEn:'PM',free:true}] },
+    { dAr:'الثلاثاء', dEn:'Tue', date:'24', slots:[{t:'6:00',ap:'ص',apEn:'AM',free:true},{t:'10:00',ap:'ص',apEn:'AM',free:true},{t:'4:00',ap:'م',apEn:'PM',free:true},{t:'7:00',ap:'م',apEn:'PM',free:false}] },
+    { dAr:'الأربعاء', dEn:'Wed', date:'25', slots:[{t:'7:00',ap:'ص',apEn:'AM',free:true},{t:'12:00',ap:'م',apEn:'PM',free:true},{t:'6:00',ap:'م',apEn:'PM',free:true}] },
+  ],
+
+  // Chat thread (coach <-> client)
+  chatThread: [
+    { who:'them', ar:'هلا فهد 👋 جاهز لحصة بكرة؟', en:'Hey Fahad 👋 ready for tomorrow?', t:'4:30 م' },
+    { who:'me', ar:'جاهز كابتن! نفس الوقت؟', en:'Ready coach! Same time?', t:'4:32 م' },
+    { who:'them', ar:'أي 5 العصر. لا تنسى تجيب حزام الرفع، بنشتغل على الديدلفت 💪', en:'Yes, 5 PM. Bring your lifting belt, we\'ll work on deadlifts 💪', t:'4:33 م' },
+    { who:'me', ar:'تمام، وش الأكل المناسب قبلها؟', en:'Got it, what should I eat before?', t:'4:35 م' },
+    { who:'them', ar:'موزة + قهوة قبلها بنص ساعة. نشوفك بكرة 🔥', en:'Banana + coffee 30min before. See you tomorrow 🔥', t:'4:36 م' },
   ],
 
   // exclusive offers (shown at top of Store)

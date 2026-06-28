@@ -22,7 +22,12 @@ const SCREENS = {
   bookConfirm: { fn: scrBookConfirm, title: 'تأكيد الحجز|Confirm',          nav: false, group: 'sub', cap: 'تأكيد حجز الحصة', badge: 'جديد' },
   bookSuccess: { fn: scrBookSuccess, title: 'تم الحجز|Booked',             nav: false, group: 'sub', cap: 'تأكيد + بطاقة الدخول', badge: 'جديد' },
   myBookings:  { fn: scrMyBookings,  title: 'حجوزاتي|My Bookings',          nav: false, group: 'sub', cap: 'الحجوزات القادمة + السابقة', badge: 'جديد' },
+  trainers:    { fn: scrTrainers,    title: 'المدربون|Coaches',             nav: false, group: 'sub', cap: 'دليل المدربين', badge: 'جديد' },
   trainer:     { fn: scrTrainer,     title: 'ملف المدرب|Trainer',           nav: false, group: 'sub', cap: 'ملف المدرب + التقييمات' },
+  ptBooking:   { fn: scrPtBooking,   title: 'حجز تدريب شخصي|Book PT',        nav: false, group: 'sub', cap: 'حجز حصة تدريب شخصي', badge: 'جديد' },
+  ptSuccess:   { fn: scrPtSuccess,   title: 'تم حجز الحصة|PT Booked',       nav: false, group: 'sub', cap: 'تأكيد حجز التدريب', badge: 'جديد' },
+  chat:        { fn: scrChat,        title: 'محادثة المدرب|Chat',           nav: false, group: 'sub', cap: 'محادثة المدرب', badge: 'جديد' },
+  cart:        { fn: scrCart,        title: 'سلة المشتريات|Cart',           nav: false, group: 'sub', cap: 'سلة المتجر', badge: 'جديد' },
   coachHome:   { fn: scrCoachHome,   title: 'لوحة الكابتن|Coach Home',       nav: true, navTab: 'coachHome', coach: true, group: 'coach', cap: 'حساب الكابتن — اليوم', badge: 'جديد' },
   coachSchedule:{fn: scrCoachSchedule,title: 'جدول الكابتن|Coach Schedule',  nav: true, navTab: 'coachSchedule', coach: true, group: 'coach', cap: 'جدول الكابتن الأسبوعي', badge: 'جديد' },
   coachRoster: { fn: scrCoachRoster, title: 'قائمة الحضور|Roster',          nav: false, coach: true, group: 'coach', cap: 'تحضير المتدربين', badge: 'جديد' },
@@ -154,6 +159,21 @@ function markAll(ci) {
   toast(L('تم تحضير الجميع ✓','All marked present ✓'));
 }
 
+/* ---- products cart ---- */
+let CART = {}; // idx -> qty
+function cartItems() { return Object.keys(CART).map(k => ({ idx: +k, qty: CART[k] })).filter(it => it.qty > 0); }
+function cartCount() { return cartItems().reduce((s, it) => s + it.qty, 0); }
+function addToCart(idx) {
+  CART[idx] = (CART[idx] || 0) + 1;
+  render();
+  toast(L('أُضيف للسلة 🛒','Added to cart 🛒'));
+}
+function changeQty(idx, d) {
+  CART[idx] = Math.max(0, (CART[idx] || 0) + d);
+  if (CART[idx] === 0) delete CART[idx];
+  render();
+}
+
 /* ---- screen index (left panel) ---- */
 function buildIndex() {
   const root = document.getElementById('screenIndex');
@@ -177,7 +197,8 @@ function groupIcon(k) {
   const m = { schedule:'calendar', onboarding:'sparkles', login:'lock', rewards:'sparkles', achievements:'flame',
     challenges:'trophy', referral:'gift', progress:'trendingUp', workout:'dumbbell', aiCoach:'sparkles',
     classDetail:'calendar', bookConfirm:'checkCircle', bookSuccess:'ticket', myBookings:'ticket',
-    trainer:'medal', checkout:'card', manageSub:'settings', wallet:'wallet', notifications:'bell',
+    trainers:'users', trainer:'medal', ptBooking:'medal', ptSuccess:'checkCircle', chat:'message', cart:'bag',
+    checkout:'card', manageSub:'settings', wallet:'wallet', notifications:'bell',
     coachHome:'home', coachSchedule:'calendar', coachRoster:'userCheck', coachClients:'users', coachProfile:'user' };
   return m[k] || 'home';
 }
