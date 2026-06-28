@@ -18,8 +18,16 @@ const SCREENS = {
   progress:    { fn: scrProgress,    title: 'تقدّمي|Progress',              nav: false, group: 'fit', cap: 'تتبّع الجسم + صور التقدم', badge: 'جديد' },
   workout:     { fn: scrWorkout,     title: 'تماريني|Workout',              nav: false, group: 'fit', cap: 'سجل التمارين + الخطة', badge: 'جديد' },
   aiCoach:     { fn: scrAiCoach,     title: 'المدرب الذكي|AI Coach',        nav: false, group: 'fit', cap: 'مدرب الذكاء الاصطناعي', badge: 'AI' },
-  classDetail: { fn: scrClassDetail, title: 'تفاصيل الحصة|Class',           nav: false, group: 'sub', cap: 'حجز الحصة' },
+  classDetail: { fn: scrClassDetail, title: 'تفاصيل الحصة|Class',           nav: false, group: 'sub', cap: 'تفاصيل الحصة + الحجز' },
+  bookConfirm: { fn: scrBookConfirm, title: 'تأكيد الحجز|Confirm',          nav: false, group: 'sub', cap: 'تأكيد حجز الحصة', badge: 'جديد' },
+  bookSuccess: { fn: scrBookSuccess, title: 'تم الحجز|Booked',             nav: false, group: 'sub', cap: 'تأكيد + بطاقة الدخول', badge: 'جديد' },
+  myBookings:  { fn: scrMyBookings,  title: 'حجوزاتي|My Bookings',          nav: false, group: 'sub', cap: 'الحجوزات القادمة + السابقة', badge: 'جديد' },
   trainer:     { fn: scrTrainer,     title: 'ملف المدرب|Trainer',           nav: false, group: 'sub', cap: 'ملف المدرب + التقييمات' },
+  coachHome:   { fn: scrCoachHome,   title: 'لوحة الكابتن|Coach Home',       nav: true, navTab: 'coachHome', coach: true, group: 'coach', cap: 'حساب الكابتن — اليوم', badge: 'جديد' },
+  coachSchedule:{fn: scrCoachSchedule,title: 'جدول الكابتن|Coach Schedule',  nav: true, navTab: 'coachSchedule', coach: true, group: 'coach', cap: 'جدول الكابتن الأسبوعي', badge: 'جديد' },
+  coachRoster: { fn: scrCoachRoster, title: 'قائمة الحضور|Roster',          nav: false, coach: true, group: 'coach', cap: 'تحضير المتدربين', badge: 'جديد' },
+  coachClients:{ fn: scrCoachClients,title: 'متدربيني|Coach Clients',        nav: true, navTab: 'coachClients', coach: true, group: 'coach', cap: 'متدربو الكابتن', badge: 'جديد' },
+  coachProfile:{ fn: scrCoachProfile,title: 'ملف الكابتن|Coach Profile',     nav: true, navTab: 'coachProfile', coach: true, group: 'coach', cap: 'ملف + أرباح الكابتن', badge: 'جديد' },
   checkout:    { fn: scrCheckout,    title: 'الدفع|Checkout',               nav: false, group: 'sub', cap: 'إتمام الدفع' },
   manageSub:   { fn: scrManageSub,   title: 'إدارة الاشتراك|Manage',        nav: false, group: 'sub', cap: 'تجميد/تجديد/ترقية', badge: 'جديد' },
   wallet:      { fn: scrWallet,      title: 'بطاقة الدخول|Pass',            nav: false, group: 'sub', cap: 'بطاقة الدخول + المحفظة' },
@@ -31,6 +39,7 @@ const GROUPS = [
   { key: 'main',   label: 'الشاشات الرئيسية|Main' },
   { key: 'engage', label: 'التفاعل والتحفيز|Engagement' },
   { key: 'fit',    label: 'اللياقة|Fitness' },
+  { key: 'coach',  label: 'حساب الكابتن|Coach account' },
   { key: 'sub',    label: 'الشاشات الفرعية|Sub-pages' },
 ];
 
@@ -39,6 +48,13 @@ const NAV_ITEMS = [
   { key: 'activity', icon: 'activity', label: 'نشاطي|Activity' },
   { key: 'store', icon: 'bag', label: 'المتجر|Store' },
   { key: 'profile', icon: 'user', label: 'حسابي|Profile' },
+];
+
+const COACH_NAV_ITEMS = [
+  { key: 'coachHome', icon: 'home', label: 'اليوم|Today' },
+  { key: 'coachSchedule', icon: 'calendar', label: 'جدولي|Schedule' },
+  { key: 'coachClients', icon: 'users', label: 'متدربيني|Clients' },
+  { key: 'coachProfile', icon: 'user', label: 'ملفي|Profile' },
 ];
 
 let current = 'home';
@@ -62,7 +78,7 @@ function render() {
 
   // bottom nav
   const navHost = document.getElementById('navHost');
-  navHost.innerHTML = sc.nav ? bottomNav(sc.navTab) : '';
+  navHost.innerHTML = sc.nav ? bottomNav(sc.navTab, sc.coach) : '';
 
   // caption
   document.getElementById('stageCaption').textContent = sc.cap || '';
@@ -105,8 +121,10 @@ function animateScreen() {
   });
 }
 
-function bottomNav(activeTab) {
-  const half = (items) => items.map(it => `
+function bottomNav(activeTab, coach) {
+  const items = coach ? COACH_NAV_ITEMS : NAV_ITEMS;
+  const fab = coach ? "rosterIdx=0;go('coachRoster')" : "go('wallet')";
+  const half = (its) => its.map(it => `
     <div class="bnav-item ${it.key===activeTab?'on':''}" onclick="go('${it.key}')">
       <span data-icon="${it.icon}"></span>
       <span class="bnav-lbl">${L(...it.label.split('|'))}</span>
@@ -115,12 +133,25 @@ function bottomNav(activeTab) {
   <div class="bnav">
     <div class="bnav-glass"></div>
     <div class="bnav-items">
-      <div class="bnav-side">${half(NAV_ITEMS.slice(0,2))}</div>
+      <div class="bnav-side">${half(items.slice(0,2))}</div>
       <div class="bnav-gap"></div>
-      <div class="bnav-side">${half(NAV_ITEMS.slice(2))}</div>
+      <div class="bnav-side">${half(items.slice(2))}</div>
     </div>
-    <div class="bnav-fab" onclick="go('wallet')">${svg('scan',26)}</div>
+    <div class="bnav-fab" onclick="${fab}">${svg('scan',26)}</div>
   </div>`;
+}
+
+/* ---- coach roster interactions ---- */
+function toggleCheck(ci, ri) {
+  const r = DATA.coachToday[ci].roster[ri];
+  r.checked = !r.checked;
+  render();
+  toast(r.checked ? L('تم تسجيل الحضور','Checked in') : L('أُلغي الحضور','Unchecked'));
+}
+function markAll(ci) {
+  DATA.coachToday[ci].roster.forEach(r => r.checked = true);
+  render();
+  toast(L('تم تحضير الجميع ✓','All marked present ✓'));
 }
 
 /* ---- screen index (left panel) ---- */
@@ -145,8 +176,9 @@ function buildIndex() {
 function groupIcon(k) {
   const m = { schedule:'calendar', onboarding:'sparkles', login:'lock', rewards:'sparkles', achievements:'flame',
     challenges:'trophy', referral:'gift', progress:'trendingUp', workout:'dumbbell', aiCoach:'sparkles',
-    classDetail:'calendar', trainer:'medal', checkout:'card', manageSub:'settings', wallet:'wallet',
-    notifications:'bell' };
+    classDetail:'calendar', bookConfirm:'checkCircle', bookSuccess:'ticket', myBookings:'ticket',
+    trainer:'medal', checkout:'card', manageSub:'settings', wallet:'wallet', notifications:'bell',
+    coachHome:'home', coachSchedule:'calendar', coachRoster:'userCheck', coachClients:'users', coachProfile:'user' };
   return m[k] || 'home';
 }
 

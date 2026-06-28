@@ -400,11 +400,19 @@ function storeProducts() {
 
 /* ============================================================ SCHEDULE (الحصص) */
 let scheduleDay = 0;
+let schedCat = 0;
+const SCHED_CATS = ['الكل|All','كروس فت|CrossFit','يوغا|Yoga','أثقال|Strength','ملاكمة|Boxing','سبينينج|Spinning','هيت|HIIT'];
 function scrSchedule() {
   const days = DATA.scheduleDays;
   const day = days[scheduleDay] || days[0];
+  const catKey = SCHED_CATS[schedCat].split('|')[0];
+  const items = day.items.map((c,i)=>({c,i})).filter(({c})=> schedCat===0 || c.catAr===catKey);
   return `
-  ${topbar(L('الحصص','Classes'), 'home')}
+  <div class="topbar">
+    <div class="topbar-btn" onclick="go('home')">${svg('chevronRight',19)}</div>
+    <div class="topbar-title">${L('الحصص','Classes')}</div>
+    <div class="topbar-btn" style="margin-inline-start:auto" onclick="go('myBookings')">${svg('ticket',18)}</div>
+  </div>
   <div class="px mt8">
     <div class="dim" style="font-size:13px">${L('اختر اليوم واحجز مكانك في الحصة','Pick a day and book your spot')}</div>
     <div class="day-row mt16">
@@ -414,19 +422,23 @@ function scrSchedule() {
           <div class="day-dt">${d.date}</div>
         </div>`).join('')}
     </div>
-    <div class="chip-row mt16">${['الكل|All','كروس فت|CrossFit','يوغا|Yoga','أثقال|Strength','ملاكمة|Boxing'].map((x,i)=>{const[a,e]=x.split('|');return `<div class="chip ${i===0?'on gold':''}">${L(a,e)}</div>`}).join('')}</div>
+    <div class="chip-row mt16">${SCHED_CATS.map((x,i)=>{const[a,e]=x.split('|');return `<div class="chip ${i===schedCat?'on gold':''}" onclick="schedCat=${i};render()">${L(a,e)}</div>`}).join('')}</div>
     <div class="between mt20">
       <div class="sec-title">${L(day.dayAr,day.dayEn)} · ${day.date} ${L(day.monthAr,day.monthEn)}</div>
-      <span class="num muted" style="font-size:12px">${day.items.length} ${L('حصص','classes')}</span>
+      <span class="num muted" style="font-size:12px">${items.length} ${L('حصص','classes')}</span>
     </div>
-    <div class="mt12">${day.items.map(c=>schedCard(c)).join('')}</div>
+    <div class="mt12">${items.length ? items.map(({c,i})=>schedCard(c,scheduleDay,i)).join('') : `<div class="dim" style="text-align:center;padding:30px 0">${L('لا حصص بهذا التصنيف اليوم','No classes in this category')}</div>`}</div>
+    <div style="height:20px"></div>
   </div>`;
 }
-function schedCard(c) {
+function schedCard(c, dayIdx, itemIdx) {
   const full = c.spots === 0;
   const low = c.spots > 0 && c.spots <= 3;
+  const click = full
+    ? `selectClass(${dayIdx},${itemIdx})`
+    : `selectClass(${dayIdx},${itemIdx})`;
   return `
-  <div class="sched-card ${full?'full':''}" onclick="${full?"toast(L('انضممت لقائمة الانتظار','Added to waitlist'))":"go('classDetail')"}">
+  <div class="sched-card ${full?'full':''}" onclick="${click}">
     <div class="sched-time">
       <div class="sched-h">${c.time}</div>
       <div class="sched-ap">${L(c.apAr,c.apEn)}</div>
@@ -703,38 +715,421 @@ function scrReferral() {
 }
 
 /* ============================================================ CLASS DETAIL (sub) */
+function curClass() {
+  return selectedClass || (DATA.scheduleDays[0] && DATA.scheduleDays[0].items[1]);
+}
 function scrClassDetail() {
-  const c = DATA.classes[0];
+  const c = curClass(); const m = DATA.classMeta;
+  const full = c.spots === 0;
+  const taken = c.cap - c.spots;
+  const day = DATA.scheduleDays[scheduleDay] || DATA.scheduleDays[0];
   return `
-  <div class="screen-hero" style="position:relative;height:230px;background:linear-gradient(160deg,#F97316,#9a3412);overflow:hidden">
-    <div class="topbar" style="position:relative;z-index:3;padding-top:60px"><div class="topbar-btn" style="background:rgba(0,0,0,.3);border:none;color:#fff" onclick="go('schedule')">${svg('chevronRight',19)}</div>
+  <div class="screen-hero" style="position:relative;height:218px;background:linear-gradient(160deg,${c.color},${c.color}55);overflow:hidden">
+    <div style="position:absolute;inset:0;background:radial-gradient(circle at 70% 20%,rgba(255,255,255,.18),transparent 60%)"></div>
+    <div class="topbar" style="position:relative;z-index:3;padding-top:58px"><div class="topbar-btn" style="background:rgba(0,0,0,.3);border:none;color:#fff" onclick="go('schedule')">${svg('chevronRight',19)}</div>
     <div class="topbar-btn" onclick="toast(L('أضيف للمفضلة','Favorited'))" style="margin-inline-start:auto;background:rgba(0,0,0,.3);border:none;color:#fff">${svg('heart',18)}</div></div>
-    <div style="position:absolute;bottom:22px;inset-inline-start:20px;color:#fff;z-index:3">
-      <div style="font-size:44px">🔥</div>
-      <div style="font-weight:900;font-size:26px">${L(c.name.ar,c.name.en)}</div>
+    <div style="position:absolute;bottom:20px;inset-inline-start:20px;color:#fff;z-index:3">
+      <div style="font-size:42px;line-height:1">${c.emoji}</div>
+      <div style="font-weight:900;font-size:25px;margin-top:6px">${L(c.nameAr,c.nameEn)}</div>
+      <div style="opacity:.9;font-size:13px;margin-top:3px">${L(day.dayAr,day.dayEn)} · ${c.time} ${L(c.apAr,c.apEn)}</div>
     </div>
   </div>
   <div class="px mt16">
-    <div class="row gap8 wrap">
-      <span class="pill">${svg('clock',13)} ${c.time} · 60 ${L('د','min')}</span>
-      <span class="pill">${svg('user',13)} ${L(c.trainer.ar,c.trainer.en)}</span>
-      <span class="pill">${svg('mapPin',13)} ${L('قاعة A','Studio A')}</span>
+    <div class="cd-stat-row">
+      <div class="cd-stat"><div class="ic" style="background:${c.color}22;color:${c.color}">${svg('clock',16)}</div><div class="v">${c.dur} ${L('د','min')}</div><div class="l">${L('المدة','Duration')}</div></div>
+      <div class="cd-stat"><div class="ic" style="background:#8B5CF622;color:#8B5CF6">${svg('trendingUp',16)}</div><div class="v" style="font-size:11.5px">${L('متوسط','Intermed.')}</div><div class="l">${L('المستوى','Level')}</div></div>
+      <div class="cd-stat"><div class="ic" style="background:#06B6D422;color:#06B6D4">${svg('mapPin',16)}</div><div class="v" style="font-size:12px">${L(m.studioAr,m.studioEn)}</div><div class="l">${L('الموقع','Location')}</div></div>
     </div>
+
     <div class="card pad mt16">
-      <div class="between"><span style="font-weight:700">${L('المقاعد المتاحة','Spots left')}</span><span class="num gold" style="font-weight:800">${c.spots}/${c.cap}</span></div>
-      <div class="mc-prog mt12" style="background:var(--surface-3)"><i style="width:${(c.cap-c.spots)/c.cap*100}%"></i></div>
+      <div class="between"><span style="font-weight:700">${L('المقاعد المتاحة','Spots left')}</span>
+      <span class="num ${full?'':'gold'}" style="font-weight:800;${full?'color:#EF4444':''}">${c.spots}/${c.cap}</span></div>
+      <div class="mc-prog mt12" style="background:var(--surface-3)"><i style="width:${taken/c.cap*100}%;${full?'background:#EF4444':''}"></i></div>
+      <div class="row gap8 between mt12">
+        <div class="att-stack">${m.attendees.slice(0,5).map(a=>`<div class="av">${a}</div>`).join('')}<span class="att-more">+${taken} ${L('مشترك','joined')}</span></div>
+        ${full?`<span class="mb-badge bg-waitlist">${L('مكتمل','Full')}</span>`:''}
+      </div>
     </div>
+
+    <div class="reward-pill mt16" style="width:100%;justify-content:center;box-sizing:border-box">${svg('sparkles',16)} ${L('احضر هذه الحصة واكسب','Attend & earn')} <b class="num">+${m.reward}</b> ${L('نقطة','pts')}</div>
+
     ${secHead(L('عن الحصة','About'))}
-    <div class="dim" style="font-size:13.5px;line-height:1.8">${L('حصة كروس فت عالية الكثافة تجمع بين رفع الأثقال والكارديو. مناسبة للمستوى المتوسط والمتقدم. أحضر معك ماء ومنشفة.','High-intensity CrossFit combining lifting and cardio. Intermediate to advanced. Bring water and a towel.')}</div>
-    <div class="card pad mt16 row gap12" onclick="go('trainer')">
+    <div class="dim" style="font-size:13.5px;line-height:1.8">${L(m.descAr,m.descEn)}</div>
+    <div class="muted" style="font-size:12px;margin-top:8px">${svg('repeat',13)} ${L(m.recurringAr,m.recurringEn)}</div>
+
+    ${secHead(L('أحضر معك','What to bring'))}
+    <div class="bring-row">${m.bringAr.map((b,i)=>`<span class="bring">${['💧','🧺','👟'][i]||'•'} ${L(b,m.bringEn[i])}</span>`).join('')}</div>
+
+    ${secHead(L('المدرب','Coach'))}
+    <div class="card pad row gap12" onclick="go('trainer')">
       <div class="avatar-ring"><div class="avatar" style="width:48px;height:48px;display:grid;place-items:center;font-size:22px;background:var(--surface-2)">💪</div></div>
-      <div style="flex:1"><div style="font-weight:700;font-size:14px">${L(c.trainer.ar,c.trainer.en)}</div>
+      <div style="flex:1"><div style="font-weight:700;font-size:14px">${L(c.trAr,c.trEn)}</div>
       <div class="muted" style="font-size:11.5px">${svg('star',12)} 4.9 · ${L('عرض الملف','View profile')}</div></div>
       ${svg('chevronLeft',18)}
     </div>
+    <div style="height:96px"></div>
+  </div>
+  <div style="position:absolute;left:16px;right:16px;bottom:16px">
+    <button class="btn ${full?'btn-ghost':'btn-gold'}" onclick="go('bookConfirm')">
+      ${full?`${svg('clock',17)} ${L('انضم لقائمة الانتظار','Join waitlist')}`:`${svg('checkCircle',18)} ${L('احجز مقعدك','Book your spot')}`}
+    </button>
+  </div>`;
+}
+
+/* ============================================================ BOOK CONFIRM (sub) */
+function scrBookConfirm() {
+  const c = curClass(); const m = DATA.classMeta;
+  const full = c.spots === 0;
+  const day = DATA.scheduleDays[scheduleDay] || DATA.scheduleDays[0];
+  return `
+  ${topbar(L('تأكيد الحجز','Confirm booking'), 'classDetail')}
+  <div class="px mt8">
+    <div class="card pad row gap13" style="align-items:center">
+      <div class="mb-em" style="background:${c.color}1f;color:${c.color}">${c.emoji}</div>
+      <div style="flex:1"><div style="font-weight:800;font-size:16px">${L(c.nameAr,c.nameEn)}</div>
+      <div class="muted" style="font-size:12px">${L(c.trAr,c.trEn)}</div></div>
+    </div>
+
+    <div class="bk-card mt16">
+      <div class="bk-line"><span class="k">${svg('calendar',14)} ${L('اليوم','Day')}</span><span class="v">${L(day.dayAr,day.dayEn)} ${day.date} ${L(day.monthAr,day.monthEn)}</span></div>
+      <div class="bk-line"><span class="k">${svg('clock',14)} ${L('الوقت','Time')}</span><span class="v">${c.time} ${L(c.apAr,c.apEn)} · ${c.dur} ${L('د','min')}</span></div>
+      <div class="bk-line"><span class="k">${svg('mapPin',14)} ${L('الموقع','Location')}</span><span class="v">${L(m.studioAr,m.studioEn)}</span></div>
+      <div class="bk-line"><span class="k">${svg('user',14)} ${L('المدرب','Coach')}</span><span class="v">${L(c.trAr,c.trEn)}</span></div>
+      <div class="bk-line"><span class="k">${svg('crown',14)} ${L('السعر','Price')}</span><span class="v green">${L('مشمول في اشتراكك','Included in plan')}</span></div>
+      <div class="bk-line"><span class="k">${svg('sparkles',14)} ${L('نقاط عند الحضور','Reward')}</span><span class="v gold">+${m.reward} ${L('نقطة','pts')}</span></div>
+    </div>
+
+    <div class="bk-policy mt16">${svg('info',16)}<span>${L('يمكنك إلغاء الحجز مجاناً حتى ساعتين قبل الحصة. الإلغاء المتأخر أو عدم الحضور قد يؤثر على أولويتك في الحجوزات القادمة.','Cancel free up to 2h before. Late cancel or no-show may affect future booking priority.')}</span></div>
+
     <div style="height:90px"></div>
   </div>
-  <div style="position:absolute;left:16px;right:16px;bottom:16px"><button class="btn btn-gold" onclick="toast(L('تم حجز مقعدك! 🎉','Booked! 🎉'))">${svg('checkCircle',18)} ${L('احجز مقعدك','Book your spot')}</button></div>`;
+  <div style="position:absolute;left:16px;right:16px;bottom:16px">
+    <button class="btn btn-gold" onclick="go('bookSuccess')">${svg('checkCircle',18)} ${full?L('تأكيد الانضمام للقائمة','Confirm waitlist'):L('تأكيد الحجز','Confirm booking')}</button>
+  </div>`;
+}
+
+/* ============================================================ BOOK SUCCESS (sub) */
+function scrBookSuccess() {
+  const c = curClass(); const m = DATA.classMeta;
+  const full = c.spots === 0;
+  const day = DATA.scheduleDays[scheduleDay] || DATA.scheduleDays[0];
+  return `
+  <div class="px" style="padding-top:30px;text-align:center">
+    <div class="bk-success-ring"><div class="core">${svg(full?'clock':'check',40)}</div></div>
+    <div style="font-weight:900;font-size:22px;margin-top:16px">${full?L('أنت في قائمة الانتظار','You\'re on the waitlist'):L('تم تأكيد حجزك! 🎉','Booking confirmed! 🎉')}</div>
+    <div class="dim" style="font-size:13.5px;margin-top:6px">${full?L('سنخبرك فور توفر مقعد','We\'ll notify you when a spot opens'):L('احجز نراك في الحصة','See you in class')}</div>
+
+    <div class="card pad mt20" style="text-align:start">
+      <div class="row gap12" style="align-items:center">
+        <div class="mb-em" style="background:${c.color}1f;color:${c.color}">${c.emoji}</div>
+        <div style="flex:1"><div style="font-weight:800;font-size:15px">${L(c.nameAr,c.nameEn)}</div>
+        <div class="muted" style="font-size:12px">${L(day.dayAr,day.dayEn)} · ${c.time} ${L(c.apAr,c.apEn)} · ${L(m.studioAr,m.studioEn)}</div></div>
+      </div>
+      ${full?'':`
+      <div class="qr-box mt16">${qrSvg(c.color)}</div>
+      <div class="muted" style="text-align:center;font-size:11.5px;margin-top:8px">${L('امسح هذا الرمز عند الدخول','Scan this at check-in')} · <b class="num">CF-2841</b></div>`}
+    </div>
+
+    <div class="row gap10 mt16">
+      <button class="btn btn-ghost" onclick="toast(L('أضيف للتقويم','Added to calendar'))">${svg('calendar',16)} ${L('أضف للتقويم','Add to calendar')}</button>
+    </div>
+    <button class="btn btn-gold mt10" onclick="go('myBookings')">${svg('ticket',17)} ${L('حجوزاتي','My bookings')}</button>
+    <div style="height:20px"></div>
+  </div>`;
+}
+
+/* ============================================================ MY BOOKINGS (sub) */
+let bookTab = 0;
+function scrMyBookings() {
+  const all = DATA.myBookings;
+  const upcoming = all.filter(b=>b.status==='confirmed'||b.status==='waitlist');
+  const past = all.filter(b=>b.status==='attended'||b.status==='missed');
+  const list = bookTab===0 ? upcoming : past;
+  return `
+  ${topbar(L('حجوزاتي','My Bookings'), 'schedule')}
+  <div class="px mt8">
+    <div class="seg">
+      <div class="s ${bookTab===0?'on':''}" onclick="bookTab=0;render()">${L('القادمة','Upcoming')} · ${upcoming.length}</div>
+      <div class="s ${bookTab===1?'on':''}" onclick="bookTab=1;render()">${L('السابقة','History')} · ${past.length}</div>
+    </div>
+    <div class="mt16" style="display:flex;flex-direction:column;gap:12px">
+      ${list.map(b=>bookingCard(b)).join('')}
+    </div>
+    <div style="height:20px"></div>
+  </div>`;
+}
+function bookingCard(b) {
+  const badge = { confirmed:[L('مؤكّد','Confirmed'),'bg-confirmed'], waitlist:[L('قائمة الانتظار','Waitlist'),'bg-waitlist'],
+    attended:[L('حضرت','Attended'),'bg-attended'], missed:[L('لم تحضر','Missed'),'bg-missed'] }[b.status];
+  let actions = '';
+  if (b.status==='confirmed') actions = `
+    <div class="mb-actions">
+      <div class="mb-act gold" onclick="go('bookSuccess')">${svg('scan',14)} ${L('بطاقة الدخول','Check-in')}</div>
+      <div class="mb-act danger" onclick="toast(L('تم إلغاء الحجز','Booking cancelled'))">${L('إلغاء','Cancel')}</div>
+    </div>`;
+  else if (b.status==='waitlist') actions = `
+    <div class="mb-actions">
+      <div class="mb-act" style="flex:2">${svg('clock',13)} ${L('ترتيبك في القائمة','Your position')}: <b class="num">${b.wpos}</b></div>
+      <div class="mb-act danger" onclick="toast(L('غادرت القائمة','Left waitlist'))">${L('مغادرة','Leave')}</div>
+    </div>`;
+  else if (b.status==='attended') actions = `
+    <div class="mb-actions">
+      <div class="mb-act" onclick="toast(L('شكراً لتقييمك','Thanks for rating'))">${svg('star',13)} ${L('قيّم الحصة','Rate')}</div>
+      <div class="mb-act gold" onclick="go('schedule')">${L('احجز مجدداً','Rebook')}</div>
+    </div>`;
+  else actions = `<div class="mb-actions"><div class="mb-act gold" onclick="go('schedule')">${L('احجز مجدداً','Rebook')}</div></div>`;
+  return `
+  <div class="card" style="padding:14px;position:relative;overflow:hidden">
+    <div class="mb" style="border:none;padding:0;background:transparent">
+      <div class="mb-em" style="background:${b.color}1f;color:${b.color}">${b.emoji}</div>
+      <div style="flex:1">
+        <div class="between"><div class="mb-name">${L(b.nameAr,b.nameEn)}</div><span class="mb-badge ${badge[1]}">${badge[0]}</span></div>
+        <div class="mb-meta">${svg('calendar',12)} ${L(b.dateAr,b.dateEn)}</div>
+        <div class="mb-meta">${svg('clock',12)} ${b.time} ${L(b.ap,b.apEn)} · ${b.dur} ${L('د','min')} · ${L(b.trAr,b.trEn)}</div>
+        ${b.kcal?`<div class="mb-meta">${svg('flame',12)} ${b.kcal} ${L('سعرة','kcal')}</div>`:''}
+      </div>
+    </div>
+    ${actions}
+  </div>`;
+}
+
+/* fake QR for the check-in pass */
+function qrSvg(color) {
+  const n = 11; let cells = '';
+  const seed = [0,2,3,5,6,8,10,1,4,7,9];
+  for (let y=0;y<n;y++) for (let x=0;x<n;x++) {
+    const on = ((x*7 + y*13 + seed[(x+y)%seed.length]) % 3 === 0) ||
+      (x<3&&y<3)||(x>n-4&&y<3)||(x<3&&y>n-4);
+    if (on) cells += `<rect x="${x*14+4}" y="${y*14+4}" width="13" height="13" rx="2.5" fill="#0A0A0A"/>`;
+  }
+  return `<svg viewBox="0 0 ${n*14+8} ${n*14+8}" width="100%" height="100%">${cells}
+    <rect x="8" y="8" width="34" height="34" rx="7" fill="none" stroke="${color}" stroke-width="5"/>
+    <rect x="${n*14+8-42}" y="8" width="34" height="34" rx="7" fill="none" stroke="${color}" stroke-width="5"/>
+    <rect x="8" y="${n*14+8-42}" width="34" height="34" rx="7" fill="none" stroke="${color}" stroke-width="5"/></svg>`;
+}
+
+/* ============================================================
+   COACH (الكابتن) ACCOUNT — separate role experience
+   ============================================================ */
+let rosterIdx = 0;
+let coachClientsTab = 0;
+
+function coachGreet() {
+  const co = DATA.coach;
+  return `
+  <div class="greet">
+    <div class="avatar-ring"><div class="avatar" style="width:46px;height:46px;display:grid;place-items:center;font-size:22px;background:var(--surface-2)">${co.emoji}</div></div>
+    <div>
+      <div class="greet-hi">${L('أهلاً كابتن','Welcome coach')} 👋</div>
+      <div class="greet-name">${L(co.nameAr.replace('كابتن ',''),co.nameEn.replace('Coach ',''))}</div>
+    </div>
+    <div class="greet-actions">
+      <div class="greet-btn" onclick="go('notifications')">${svg('bell',20)}<span class="qa-dot">2</span></div>
+      <div class="greet-btn" onclick="go('home')" title="${L('تبديل لحساب عضو','Switch to member')}">${svg('repeat',19)}</div>
+    </div>
+  </div>`;
+}
+
+function scrCoachHome() {
+  const co = DATA.coach;
+  const next = DATA.coachToday.find(c=>c.state==='next') || DATA.coachToday[0];
+  const total = DATA.coachToday.reduce((s,c)=>s+c.roster.length,0);
+  return `
+  ${coachGreet()}
+  <div class="px mt16">
+    <div class="co-hero reveal">
+      <div class="ttl">${L('جدولك اليوم','Your day')}</div>
+      <div style="opacity:.75;font-size:13px;margin-top:3px">${L('السبت 21 يونيو','Sat 21 Jun')} · ${DATA.coachToday.length} ${L('حصص','classes')}</div>
+      <div class="co-kpi">
+        <div class="k"><div class="v num">${DATA.coachToday.length}</div><div class="l">${L('حصص اليوم','Classes')}</div></div>
+        <div class="k"><div class="v num">${total}</div><div class="l">${L('متدرب','Attendees')}</div></div>
+        <div class="k"><div class="v num">${co.rating}</div><div class="l">${L('تقييمك','Rating')}</div></div>
+      </div>
+    </div>
+
+    ${secHead(L('الحصة القادمة','Next class'))}
+    <div class="co-next reveal" onclick="rosterIdx=${DATA.coachToday.indexOf(next)};go('coachRoster')">
+      <div class="row gap13" style="align-items:center">
+        <div class="co-next-em" style="background:${next.color}1f;color:${next.color}">${next.emoji}</div>
+        <div style="flex:1">
+          <div class="between"><div style="font-weight:800;font-size:16px">${L(next.nameAr,next.nameEn)}</div><span class="cls-state st-next">${L('بعد '+next.inMins+' د','in '+next.inMins+'m')}</span></div>
+          <div class="muted" style="font-size:12px;margin-top:3px">${svg('clock',12)} ${next.time} ${L(next.ap,next.apEn)} · ${svg('mapPin',12)} ${L(next.studioAr,next.studioEn)}</div>
+        </div>
+      </div>
+      <div class="attend-bar mt14">
+        <div class="att-stack">${next.roster.slice(0,5).map(r=>`<div class="av" style="width:30px;height:30px;background:var(--surface-3);border-radius:50%;display:grid;place-items:center;border:2px solid var(--card);margin-inline-start:-9px">${r.emoji}</div>`).join('')}</div>
+        <div style="flex:1"><div class="num big">${next.roster.length}<span class="muted" style="font-size:13px;font-weight:600">/${next.cap}</span></div><div class="muted" style="font-size:11px">${L('مسجّلين','booked')}</div></div>
+        <button class="btn btn-gold" style="width:auto;padding:10px 18px">${svg('scan',16)} ${L('تحضير','Check-in')}</button>
+      </div>
+    </div>
+
+    ${secHead(L('كل حصص اليوم','Today\'s classes'), L('الأسبوع','Week'), "go('coachSchedule')")}
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${DATA.coachToday.map((c,i)=>coachClassRow(c,i)).join('')}
+    </div>
+
+    ${secHead(L('أرباح الشهر','This month'))}
+    <div class="card pad reveal">
+      <div class="between"><div><div class="muted" style="font-size:12px">${L('إجمالي مستحقاتك','Total earnings')}</div>
+      <div class="num" style="font-weight:900;font-size:26px">${co.earnMonth.toLocaleString()} <span class="gold" style="font-size:14px">${L('ر.س','SAR')}</span></div></div>
+      <div class="soft-ico" style="width:46px;height:46px">${svg('wallet',22)}</div></div>
+      <div class="row gap10 mt14">
+        <div class="bring" style="flex:1;justify-content:center">${svg('users',13)} ${co.earnClasses} ${L('حصة جماعية','classes')}</div>
+        <div class="bring" style="flex:1;justify-content:center">${svg('medal',13)} ${co.earnPT} ${L('حصة شخصية','PT')}</div>
+      </div>
+      <div class="muted" style="font-size:11.5px;margin-top:12px;text-align:center">${svg('clock',12)} ${L(co.payoutAr,co.payoutEn)}</div>
+    </div>
+    <div style="height:90px"></div>
+  </div>`;
+}
+function coachClassRow(c, i) {
+  const st = { next:['st-next',L('القادمة','Next')], upcoming:['st-up',L('لاحقاً','Later')], done:['st-done',L('انتهت','Done')] }[c.state];
+  return `
+  <div class="co-cls" onclick="rosterIdx=${i};go('coachRoster')">
+    <div class="co-cls-time"><div class="h">${c.time}</div><div class="a">${L(c.ap,c.apEn)}</div></div>
+    <div style="width:3px;align-self:stretch;border-radius:9px;background:${c.color}"></div>
+    <div style="flex:1">
+      <div class="row gap8" style="align-items:center"><span style="font-weight:700;font-size:14px">${c.emoji} ${L(c.nameAr,c.nameEn)}</span><span class="cls-state ${st[0]}">${st[1]}</span></div>
+      <div class="co-cls-cap" style="margin-top:4px">${svg('users',12)} ${c.roster.length}/${c.cap} · ${svg('mapPin',12)} ${L(c.studioAr,c.studioEn)}</div>
+    </div>
+    ${svg('chevronLeft',18)}
+  </div>`;
+}
+
+function scrCoachRoster() {
+  const c = DATA.coachToday[rosterIdx] || DATA.coachToday[0];
+  const present = c.roster.filter(r=>r.checked).length;
+  return `
+  ${topbar(L(c.nameAr,c.nameEn), 'coachHome')}
+  <div class="px mt8">
+    <div class="card pad row gap12" style="align-items:center">
+      <div class="co-next-em" style="background:${c.color}1f;color:${c.color}">${c.emoji}</div>
+      <div style="flex:1"><div style="font-weight:800;font-size:15px">${L(c.nameAr,c.nameEn)}</div>
+      <div class="muted" style="font-size:12px">${c.time} ${L(c.ap,c.apEn)} · ${c.dur} ${L('د','min')} · ${L(c.studioAr,c.studioEn)}</div></div>
+    </div>
+
+    <div class="attend-bar mt16">
+      <div class="ic" style="width:42px;height:42px;border-radius:12px;background:#22C55E22;color:#22C55E;display:grid;place-items:center">${svg('userCheck',20)}</div>
+      <div style="flex:1"><div class="num big" id="presentCount">${present}<span class="muted" style="font-size:13px;font-weight:600">/${c.roster.length}</span></div><div class="muted" style="font-size:11px">${L('حضروا الآن','checked in')}</div></div>
+      <button class="btn btn-gold" style="width:auto;padding:10px 16px" onclick="markAll(${rosterIdx})">${L('تحضير الكل','Mark all')}</button>
+    </div>
+
+    ${secHead(L('قائمة الحضور','Attendance'), c.roster.length+' '+L('متدرب','clients'))}
+    <div style="display:flex;flex-direction:column;gap:9px">
+      ${c.roster.map((r,ri)=>`
+        <div class="ro">
+          <div class="ro-av">${r.emoji}</div>
+          <div style="flex:1"><div class="ro-name">${L(r.nameAr,r.nameEn)}</div><div class="ro-sub">${r.checked?L('✓ حاضر','✓ Present'):L('بانتظار التحضير','Awaiting')}</div></div>
+          <div class="ro-check ${r.checked?'on':''}" onclick="event.stopPropagation();toggleCheck(${rosterIdx},${ri})">${svg('check',16)}</div>
+        </div>`).join('')}
+    </div>
+
+    ${c.waitlist && c.waitlist.length ? `
+    ${secHead(L('قائمة الانتظار','Waitlist'), c.waitlist.length)}
+    <div style="display:flex;flex-direction:column;gap:9px">
+      ${c.waitlist.map(w=>`
+        <div class="ro" style="opacity:.8">
+          <div class="ro-av">${w.emoji}</div>
+          <div style="flex:1"><div class="ro-name">${L(w.nameAr,w.nameEn)}</div><div class="ro-sub">${L('في الانتظار','Waiting')}</div></div>
+          <div class="mb-act" style="flex:0;padding:8px 13px" onclick="toast(L('تمت ترقيته للحصة','Promoted to class'))">${L('إضافة','Add')}</div>
+        </div>`).join('')}
+    </div>` : ''}
+    <div style="height:96px"></div>
+  </div>
+  <div style="position:absolute;left:16px;right:16px;bottom:16px">
+    <button class="btn btn-gold" onclick="toast(L('تم إنهاء الحصة وتسجيل الحضور','Class closed · attendance saved'))">${svg('checkCircle',18)} ${L('إنهاء الحصة','End class')}</button>
+  </div>`;
+}
+
+function scrCoachSchedule() {
+  const w = DATA.coachWeek;
+  return `
+  ${topbar(L('جدولي الأسبوعي','My Schedule'), 'coachHome')}
+  <div class="px mt8">
+    <div class="dim" style="font-size:13px">${L('نظرة على حصصك خلال الأسبوع','Your week at a glance')}</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px">
+      ${w.map((d,i)=>`
+        <div class="co-cls" style="cursor:${d.off?'default':'pointer'}" ${d.off?'':`onclick="go('coachHome')"`}>
+          <div class="co-cls-time"><div class="h num">${d.date}</div><div class="a">${L(d.dAr,d.dEn)}</div></div>
+          <div style="width:3px;align-self:stretch;border-radius:9px;background:${d.off?'var(--surface-3)':(d.today?'var(--gold)':'#06B6D4')}"></div>
+          <div style="flex:1">
+            <div class="row gap8" style="align-items:center">
+              <span style="font-weight:700;font-size:14px">${d.off?L('يوم راحة','Rest day'):`${d.count} ${L('حصص','classes')}`}</span>
+              ${d.today?`<span class="cls-state st-next">${L('اليوم','Today')}</span>`:''}
+            </div>
+            <div class="co-cls-cap" style="margin-top:4px">${svg('clock',12)} ${d.off?L('—','—'):d.hoursAr}</div>
+          </div>
+          ${d.off?'':svg('chevronLeft',18)}
+        </div>`).join('')}
+    </div>
+    <div style="height:90px"></div>
+  </div>`;
+}
+
+function scrCoachClients() {
+  const cl = DATA.coachClients;
+  return `
+  ${topbar(L('متدربيني','My Clients'), 'coachHome')}
+  <div class="px mt8">
+    <div class="seg">
+      <div class="s ${coachClientsTab===0?'on':''}" onclick="coachClientsTab=0;render()">${L('تدريب شخصي','PT')} · ${cl.length}</div>
+      <div class="s ${coachClientsTab===1?'on':''}" onclick="coachClientsTab=1;render()">${L('الكل','All')}</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px">
+      ${cl.map(c=>`
+        <div class="cc">
+          <div class="row gap12" style="align-items:center">
+            <div class="ro-av" style="width:46px;height:46px;font-size:22px">${c.emoji}</div>
+            <div style="flex:1"><div style="font-weight:800;font-size:14.5px">${L(c.nameAr,c.nameEn)}</div>
+            <div class="muted" style="font-size:11.5px">${L(c.pkgAr,c.pkgEn)}</div></div>
+            ${c.low?`<span class="mb-badge bg-waitlist">${L('باقي '+c.left,c.left+' left')}</span>`:c.fresh?`<span class="mb-badge bg-confirmed">${L('جديد','New')}</span>`:`<span class="mb-badge bg-attended">${c.left} ${L('متبقية','left')}</span>`}
+          </div>
+          <div class="ro-progress"><i style="width:${c.progress}%"></i></div>
+          <div class="between muted" style="font-size:11px;margin-top:7px"><span>${c.lastAr}</span><span class="num">${c.total-c.left}/${c.total} ${L('حصة','done')}</span></div>
+          <div class="mb-actions">
+            <div class="mb-act" onclick="toast(L('فتح المحادثة','Open chat'))">${svg('message',13)} ${L('مراسلة','Message')}</div>
+            <div class="mb-act gold" onclick="toast(L('تسجيل حصة جديدة','Log a session'))">${svg('plus',13)} ${L('تسجيل حصة','Log session')}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+    <div style="height:90px"></div>
+  </div>`;
+}
+
+function scrCoachProfile() {
+  const co = DATA.coach;
+  return `
+  ${topbar(L('ملفي','My Profile'), 'coachHome')}
+  <div class="px mt8" style="text-align:center">
+    <div class="avatar-ring" style="width:104px;height:104px;margin:8px auto 0;padding:3px"><div class="avatar" style="width:100%;height:100%;display:grid;place-items:center;font-size:46px;background:var(--surface-2)">${co.emoji}</div></div>
+    <div style="font-weight:800;font-size:20px;margin-top:12px">${L(co.nameAr,co.nameEn)}</div>
+    <div class="muted" style="font-size:13px">${L(co.specAr,co.specEn)}</div>
+    <div class="row gap8 mt12" style="justify-content:center">
+      <span class="pill gold">${svg('star',13)} ${co.rating}</span>
+      <span class="pill">${svg('users',13)} ${co.clients} ${L('متدرب','clients')}</span>
+      <span class="pill">${svg('award',13)} ${co.yrs} ${L('سنوات','yrs')}</span>
+    </div>
+  </div>
+  <div class="px mt20">
+    <div class="stat-grid">
+      ${metric(co.classesMonth, L('حصص هذا الشهر','Classes/mo'), 'calendar', '#06B6D4')}
+      ${metric(co.reviews, L('تقييم','Reviews'), 'star', '#D4AF37')}
+      ${metric(co.earnMonth.toLocaleString(), L('ر.س مستحقات','SAR earned'), 'wallet', '#22C55E')}
+    </div>
+    ${secHead(L('نبذة','Bio'), L('تعديل','Edit'), "toast(L('تعديل النبذة','Edit bio'))")}
+    <div class="dim" style="font-size:13.5px;line-height:1.8">${L(co.bioAr,co.bioEn)}</div>
+    ${secHead(L('التخصصات','Specialties'))}
+    <div class="bring-row">${co.specsAr.map((s,i)=>`<span class="bring">${L(s,co.specsEn[i])}</span>`).join('')}</div>
+    ${secHead(L('آخر التقييمات','Recent reviews'), co.rating+' ★')}
+    ${DATA.coachReviews.map(r=>`
+      <div class="card pad mt8">
+        <div class="between"><div class="row gap8"><div class="ro-av" style="width:34px;height:34px;font-size:17px">${r.emoji}</div><span style="font-weight:700;font-size:13.5px">${L(r.nameAr,r.nameEn)}</span></div>
+        <span class="gold" style="font-size:12px">${'★'.repeat(r.st)}</span></div>
+        <div class="dim" style="font-size:13px;margin-top:8px;line-height:1.6">${L(r.ar,r.en)}</div>
+      </div>`).join('')}
+    <button class="btn btn-ghost mt16" onclick="go('home')">${svg('repeat',16)} ${L('تبديل لحساب عضو','Switch to member account')}</button>
+    <div style="height:90px"></div>
+  </div>`;
 }
 
 /* ============================================================ TRAINER PROFILE (sub) */
@@ -974,6 +1369,12 @@ function scrProfile() {
     </div>
   </div>
   <div class="px mt20">
+    <div class="role-switch reveal" onclick="go('coachHome')">
+      <div class="ic">${svg('repeat',19)}</div>
+      <div style="flex:1"><div style="font-weight:800;font-size:14px">${L('الدخول كحساب كابتن','Switch to Coach account')}</div>
+      <div style="opacity:.7;font-size:11.5px">${L('للمدربين — جدول وحضور ومتدربين','For trainers — schedule, attendance, clients')}</div></div>
+      ${svg('chevronLeft',18)}
+    </div>
     ${secHead(L('الحساب','Account'))}
     <div class="card" style="padding:4px 16px">
       ${profRow('user', L('المعلومات الشخصية','Personal info'))}

@@ -67,6 +67,9 @@ const ICONS = {
   flag: '<path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/>',
   nfc: '<path d="M6 8.5a8 8 0 0 1 0 7"/><path d="M9.5 6.5a12 12 0 0 1 0 11"/><path d="M13 4.5a16 16 0 0 1 0 15"/>',
   history: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 8v4l3 2"/>',
+  ticket: '<path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 1 0 4 2 2 0 0 1-2 2H5a2 2 0 0 1-2-2 2 2 0 0 0 0-4 2 2 0 0 0 0-4Z"/><path d="M13 6v12"/>',
+  repeat: '<path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/>',
+  userCheck: '<circle cx="9" cy="8" r="4"/><path d="M3 20c0-3.5 2.7-5.5 6-5.5"/><path d="M16 11l2 2 4-4"/>',
 };
 
 function svg(name, size, cls) {

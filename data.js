@@ -193,4 +193,91 @@ const DATA = {
     { who: 'me', ar: 'وش أفضل أكل قبل التمرين؟', en: 'What should I eat before my workout?' },
     { who: 'ai', ar: 'قبل التمرين بساعة تقريباً: مصدر كارب معقد + بروتين خفيف. مثال: شوفان + موزة + ملعقة زبدة فول سوداني، أو أرز + صدر دجاج. يعطيك طاقة ثابتة بدون ثقل. ودّي أرتب لك خطة وجبات كاملة؟ 💪', en: 'About 1h before: complex carbs + light protein. e.g. oats + banana + peanut butter, or rice + chicken. Want a full meal plan? 💪' },
   ],
+
+  // ===== CLASS BOOKING — selected class detail (rich) =====
+  // (filled at runtime by selectClass(); this is the fallback)
+  classMeta: {
+    levelAr: 'متوسط - متقدم', levelEn: 'Intermediate · Advanced',
+    studioAr: 'قاعة A', studioEn: 'Studio A',
+    reward: 80, // loyalty points for attending
+    descAr: 'حصة عالية الكثافة تجمع بين رفع الأثقال والكارديو. مناسبة للمستوى المتوسط والمتقدم.',
+    descEn: 'High-intensity session combining lifting and cardio. Intermediate to advanced.',
+    bringAr: ['ماء', 'منشفة', 'حذاء رياضي'], bringEn: ['Water', 'Towel', 'Training shoes'],
+    attendees: ['🧑','🧑','👩','🧑','👨','👩'],
+    recurringAr: 'تتكرر كل سبت وإثنين وأربعاء', recurringEn: 'Repeats Sat · Mon · Wed',
+  },
+
+  // ===== MY BOOKINGS (client side) — upcoming + history =====
+  myBookings: [
+    { nameAr:'كروس فت', nameEn:'CrossFit', emoji:'🔥', color:'#F97316', dateAr:'اليوم · السبت 21 يونيو', dateEn:'Today · Sat 21 Jun', time:'6:00', ap:'م', apEn:'PM', dur:60, trAr:'كابتن خالد', trEn:'Coach Khalid', studioAr:'قاعة A', studioEn:'Studio A', status:'confirmed', code:'CF-2841', inMins:42 },
+    { nameAr:'يوغا مسائية', nameEn:'Evening Yoga', emoji:'🧘‍♀️', color:'#8B5CF6', dateAr:'غداً · الأحد 22 يونيو', dateEn:'Tomorrow · Sun 22 Jun', time:'8:00', ap:'م', apEn:'PM', dur:45, trAr:'كابتن نورة', trEn:'Coach Noura', studioAr:'قاعة اليوغا', studioEn:'Yoga Studio', status:'waitlist', wpos:2, code:'YG-5520' },
+    { nameAr:'ملاكمة', nameEn:'Boxing', emoji:'🥊', color:'#EF4444', dateAr:'الإثنين 16 يونيو', dateEn:'Mon 16 Jun', time:'9:00', ap:'م', apEn:'PM', dur:60, trAr:'كابتن خالد', trEn:'Coach Khalid', studioAr:'حلبة الملاكمة', studioEn:'Boxing Ring', status:'attended', kcal:540, code:'BX-1190' },
+    { nameAr:'سبينينج', nameEn:'Spinning', emoji:'🚴', color:'#06B6D4', dateAr:'السبت 14 يونيو', dateEn:'Sat 14 Jun', time:'6:00', ap:'ص', apEn:'AM', dur:60, trAr:'كابتن سعد', trEn:'Coach Saad', studioAr:'قاعة السبينينج', studioEn:'Spin Studio', status:'attended', kcal:610, code:'SP-0934' },
+    { nameAr:'يوغا', nameEn:'Yoga', emoji:'🧘‍♀️', color:'#8B5CF6', dateAr:'الخميس 12 يونيو', dateEn:'Thu 12 Jun', time:'7:00', ap:'م', apEn:'PM', dur:45, trAr:'كابتن نورة', trEn:'Coach Noura', studioAr:'قاعة اليوغا', studioEn:'Yoga Studio', status:'missed', code:'YG-0021' },
+  ],
+
+  // ===== COACH (الكابتن) ACCOUNT =====
+  coach: {
+    nameAr:'كابتن سعد', nameEn:'Coach Saad', emoji:'💪',
+    specAr:'مدرب لياقة وتضخيم معتمد', specEn:'Certified Strength Coach',
+    rating:4.9, reviews:128, clients:42, classesMonth:36, yrs:8,
+    bioAr:'مدرب معتمد NASM بخبرة 8 سنوات في بناء العضلات والتغذية الرياضية. أؤمن أن الالتزام أهم من الكمال.',
+    bioEn:'NASM-certified coach · 8 years in muscle building and sports nutrition.',
+    specsAr:['تضخيم','قوة','تغذية','فقدان دهون'], specsEn:['Hypertrophy','Strength','Nutrition','Fat loss'],
+    earnMonth: 9450, earnClasses: 36, earnPT: 24, payoutAr:'الدفعة القادمة 1 يوليو', payoutEn:'Next payout Jul 1',
+  },
+  // coach's classes today, with roster
+  coachToday: [
+    { time:'6:00', ap:'م', apEn:'PM', nameAr:'كروس فت', nameEn:'CrossFit', emoji:'🔥', color:'#F97316', studioAr:'قاعة A', studioEn:'Studio A', dur:60, cap:16, state:'next', inMins:42,
+      roster:[
+        {nameAr:'تركي العتيبي',nameEn:'Turki Al-Otaibi',emoji:'🧑',checked:false},
+        {nameAr:'عبدالله الزهراني',nameEn:'Abdullah',emoji:'🧔',checked:false},
+        {nameAr:'فهد العتيبي',nameEn:'Fahad',emoji:'🧑',checked:false},
+        {nameAr:'ماجد القحطاني',nameEn:'Majed',emoji:'👨',checked:false},
+        {nameAr:'سلطان',nameEn:'Sultan',emoji:'🧑',checked:false},
+        {nameAr:'نواف',nameEn:'Nawaf',emoji:'🧔',checked:false},
+        {nameAr:'ريان',nameEn:'Rayan',emoji:'👨',checked:false},
+      ],
+      waitlist:[ {nameAr:'بدر',nameEn:'Badr',emoji:'🧑'}, {nameAr:'يوسف',nameEn:'Yousef',emoji:'🧔'} ] },
+    { time:'8:00', ap:'م', apEn:'PM', nameAr:'رفع أثقال', nameEn:'Strength', emoji:'🏋️', color:'#D4AF37', studioAr:'قاعة الأوزان', studioEn:'Weights Hall', dur:60, cap:12, state:'upcoming',
+      roster:[
+        {nameAr:'تركي العتيبي',nameEn:'Turki',emoji:'🧑',checked:false},
+        {nameAr:'خالد',nameEn:'Khalid',emoji:'🧔',checked:false},
+        {nameAr:'عمر',nameEn:'Omar',emoji:'👨',checked:false},
+        {nameAr:'فيصل',nameEn:'Faisal',emoji:'🧑',checked:false},
+      ], waitlist:[] },
+    { time:'10:00', ap:'ص', apEn:'AM', nameAr:'تدريب شخصي · تركي', nameEn:'PT · Turki', emoji:'🎯', color:'#22C55E', studioAr:'منطقة PT', studioEn:'PT Zone', dur:45, cap:1, state:'done', pt:true,
+      roster:[ {nameAr:'تركي العتيبي',nameEn:'Turki',emoji:'🧑',checked:true} ], waitlist:[] },
+  ],
+  // coach weekly schedule (count per day)
+  coachWeek: [
+    { dAr:'السبت', dEn:'Sat', date:'21', count:3, hoursAr:'6 ص - 8 م', today:true },
+    { dAr:'الأحد', dEn:'Sun', date:'22', count:2, hoursAr:'6 م - 8 م' },
+    { dAr:'الإثنين', dEn:'Mon', date:'23', count:4, hoursAr:'6 ص - 9 م' },
+    { dAr:'الثلاثاء', dEn:'Tue', date:'24', count:2, hoursAr:'6 م - 9 م' },
+    { dAr:'الأربعاء', dEn:'Wed', date:'25', count:3, hoursAr:'7 ص - 6 م' },
+    { dAr:'الخميس', dEn:'Thu', date:'26', count:0, hoursAr:'راحة', off:true },
+    { dAr:'الجمعة', dEn:'Fri', date:'27', count:0, hoursAr:'راحة', off:true },
+  ],
+  // coach PT clients
+  coachClients: [
+    { nameAr:'تركي العتيبي', nameEn:'Turki', emoji:'🧑', pkgAr:'باقة النخبة · 8 حصص', pkgEn:'Elite · 8 sessions', left:5, total:8, progress:62, lastAr:'آخر حصة: أمس' },
+    { nameAr:'عبدالله الزهراني', nameEn:'Abdullah', emoji:'🧔', pkgAr:'باقة الاحتراف · 12 حصة', pkgEn:'Pro · 12 sessions', left:9, total:12, progress:25, lastAr:'آخر حصة: قبل 3 أيام' },
+    { nameAr:'ماجد القحطاني', nameEn:'Majed', emoji:'👨', pkgAr:'باقة البداية · 4 حصص', pkgEn:'Starter · 4 sessions', left:1, total:4, progress:75, lastAr:'آخر حصة: اليوم', low:true },
+    { nameAr:'نواف', nameEn:'Nawaf', emoji:'🧔', pkgAr:'باقة النخبة · 8 حصص', pkgEn:'Elite · 8 sessions', left:8, total:8, progress:0, lastAr:'لم تبدأ بعد', fresh:true },
+  ],
+  // coach reviews
+  coachReviews: [
+    { nameAr:'تركي', nameEn:'Turki', emoji:'🧑', st:5, ar:'مدرب محترف وملتزم، شفت نتيجة بعد شهر', en:'Pro and committed, saw results in a month' },
+    { nameAr:'نواف', nameEn:'Nawaf', emoji:'🧔', st:5, ar:'أفضل كابتن في النادي بدون مبالغة', en:'Best coach hands down' },
+    { nameAr:'ماجد', nameEn:'Majed', emoji:'👨', st:4, ar:'تمارين قوية ومتنوعة، أنصح فيه', en:'Strong varied workouts, recommend' },
+  ],
 };
+
+// runtime: currently selected class for the detail screen
+let selectedClass = null;
+function selectClass(dayIdx, itemIdx) {
+  const d = DATA.scheduleDays[dayIdx];
+  selectedClass = d ? d.items[itemIdx] : null;
+  go('classDetail');
+}
